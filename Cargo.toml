@@ -1,0 +1,19 @@
+[package]
+name = "cardio-rs"
+version = "0.1.0"
+edition = "2024"
+
+[features]
+default = []
+std = [
+  "arrayvec/std",
+  "num/std",
+]
+
+[dependencies]
+arrayvec = "0.7.6"
+libm = "0.2.11"
+num = "0.4.3"
+
+[dev-dependencies]
+approx = "0.5.1"
