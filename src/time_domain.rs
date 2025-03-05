@@ -1,4 +1,6 @@
-use arrayvec::ArrayVec;
+extern crate alloc;
+
+use alloc::vec::Vec;
 use core::iter::Sum;
 use num::Float;
 
@@ -11,7 +13,7 @@ pub struct TimeMetrics<T> {
 
 impl<T: Float + Sum<T> + Copy + core::fmt::Debug> TimeMetrics<T> {
     pub fn compute(rr_intervals: &[T]) -> Self {
-        let rr_diffs: ArrayVec<T, 100> = rr_intervals.windows(2).map(|i| i[1] - i[0]).collect();
+        let rr_diffs: Vec<T> = rr_intervals.windows(2).map(|i| i[1] - i[0]).collect();
         let rr_diffs_mean: T =
             rr_diffs.iter().copied().sum::<T>() / T::from(rr_diffs.len()).unwrap();
 
