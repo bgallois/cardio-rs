@@ -22,8 +22,9 @@ impl<
         + num::FromPrimitive,
 > FrequenceMetrics<T>
 {
-    pub fn compute(rr_intervals: &[T], rate: T) -> Self {
-        let welch: SpectralDensity<T> = SpectralDensity::builder(&rr_intervals, rate).build();
+    pub fn compute(sampled_rr_intervals: &[T], rate: T) -> Self {
+        let welch: SpectralDensity<T> =
+            SpectralDensity::builder(&sampled_rr_intervals, rate).build();
         let psd = welch.periodogram();
         let delta_f = T::from(rate).unwrap() / T::from(psd.frequency().len()).unwrap();
 
