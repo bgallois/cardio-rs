@@ -14,19 +14,20 @@ pub struct TimeMetrics<T> {
 impl<T: Float + Sum<T> + Copy + core::fmt::Debug> TimeMetrics<T> {
     pub fn compute(rr_intervals: &[T]) -> Self {
         let rr_diffs: Vec<T> = rr_intervals.windows(2).map(|i| i[1] - i[0]).collect();
-        let rr_diffs_mean: T =
-            rr_diffs.iter().copied().sum::<T>() / T::from(rr_diffs.len()).unwrap();
+        let rr_intervals_mean: T =
+            rr_intervals.iter().copied().sum::<T>() / T::from(rr_intervals.len()).unwrap();
 
-        let variance = rr_diffs
+        let variance = rr_intervals
             .iter()
-            .map(|&x| (x - rr_diffs_mean) * (x - rr_diffs_mean))
+            .map(|&x| (x - rr_intervals_mean) * (x - rr_intervals_mean))
             .sum::<T>()
-            / T::from(rr_intervals.len() - 1usize).unwrap();
+            / T::from(rr_diffs.len()).unwrap();
 
         let sdnn = variance.sqrt();
-        let rmssd = (rr_diffs.iter().map(|&x| x * x).sum::<T>()
-            / T::from(rr_intervals.len() - 1usize).unwrap())
-        .sqrt();
+
+        let rmssd =
+            (rr_diffs.iter().map(|&x| x * x).sum::<T>() / T::from(rr_diffs.len()).unwrap()).sqrt();
+
         let pnn50 = T::from(
             rr_diffs
                 .iter()
@@ -34,7 +35,7 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug> TimeMetrics<T> {
                 .count(),
         )
         .unwrap()
-            / T::from(rr_intervals.len() - 1usize).unwrap();
+            / T::from(rr_diffs.len()).unwrap();
         Self { sdnn, rmssd, pnn50 }
     }
 }
@@ -42,6 +43,7 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug> TimeMetrics<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_data::test_data::RR_INTERVALS;
     use approx::AbsDiffEq;
     use approx::RelativeEq;
     use approx::UlpsEq;
@@ -95,17 +97,16 @@ mod tests {
 
     #[test]
     fn test_metrics() {
-        let rr_intervals: &[f64] = &[800., 810., 790., 850., 795., 900., 860., 950.];
-        let time_params = TimeMetrics::compute(rr_intervals);
+        let time_params = TimeMetrics::compute(&RR_INTERVALS);
 
         assert_relative_eq!(
             TimeMetrics {
-                rmssd: 63.075918f64,
-                sdnn: 59.324428f64,
-                pnn50: 0.57142857f64,
+                rmssd: 59.99807873965272,
+                sdnn: 69.54843274772418,
+                pnn50: 0.414985590778098,
             },
             time_params,
-            epsilon = 1e-7
+            epsilon = 1e-14
         );
     }
 }

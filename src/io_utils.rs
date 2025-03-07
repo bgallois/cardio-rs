@@ -20,7 +20,6 @@ impl Data {
     }
 
     pub fn get_rr(self) -> Vec<f64> {
-        // Collect the entire data once to reuse later
         let df = self.data.clone().collect().unwrap();
 
         let rate = self
