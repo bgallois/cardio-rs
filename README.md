@@ -34,3 +34,22 @@ The following frequency-domain HRV metrics are computed using Welch’s method f
 The library also provides functions for processing raw ECG and PPG data, including:
 - **ECG Data Processing**: Includes algorithms for filtering and detecting R-wave peaks for RR interval extraction, which can be used to compute HRV metrics.
 - **PPG Data Processing**: Includes preprocessing techniques for PPG signals, such as pulse detection and signal cleaning, which can also be used to extract RR intervals and calculate HRV metrics.
+
+## Example
+
+```rust
+use cardio_rs::processing_utils::{RRIntervals, EctopicMethod, DetectOutliers};
+use cardio_rs::time_domain::TimeMetrics;
+use cardio_rs::frequence_domain::FrequenceMetrics;
+
+let mut rr_intervals = RRIntervals::new(vec![800.0, 850.0, 900.0, 600.0, 800.0, 820.0, 840.0]);
+rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
+rr_intervals.detect_outliers(&300., &2_000.);
+rr_intervals.remove_outliers_ectopics();
+
+let frequency_metrics = FrequenceMetrics::compute(rr_intervals.as_slice());
+println!("{:?}", frequency_metrics);
+
+let time_metrics = TimeMetrics::compute(rr_intervals.as_slice());
+println!("{:?}", time_metrics);
+```

@@ -77,9 +77,11 @@ impl<
     ///
     /// # Example
     /// ```
+    /// use cardio_rs::time_metrics::FrequencyMetrics;
+    ///
     /// let sampled_rr_intervals = vec![0.85, 0.82, 0.80, 0.79];
     /// let rate = 4.0;
-    /// let frequency_metrics = compute_sampled(&sampled_rr_intervals, rate);
+    /// let frequency_metrics = FrequencyMetrics::compute_sampled(&sampled_rr_intervals, rate);
     /// ```
     ///
     /// # Notes
@@ -181,8 +183,10 @@ impl<
     ///
     /// # Example
     /// ```
+    /// use cardio_rs::time_metrics::FrequencyMetrics;
+    ///
     /// let rr_intervals = vec![0.85, 0.82, 0.80, 0.79];
-    /// let frequency_metrics = compute(&rr_intervals);
+    /// let frequency_metrics = FrequenceMetrics::compute(&rr_intervals);
     /// ```
     ///
     /// # Notes
@@ -202,7 +206,7 @@ impl<
             .map(|i| T::from(i).unwrap() / rate)
             .collect::<Vec<T>>();
 
-        let sampled_rr_intervals = interp_slice(&x, &rr_intervals, &xp, &InterpMode::Extrapolate);
+        let sampled_rr_intervals = interp_slice(&x, rr_intervals, &xp, &InterpMode::Extrapolate);
         Self::compute_sampled(&sampled_rr_intervals, rate)
     }
 }

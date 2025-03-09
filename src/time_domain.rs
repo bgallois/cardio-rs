@@ -22,9 +22,9 @@
 //!
 //! # Example
 //! ```
-//! use time_metrics::TimeMetrics;
+//! use cardio_rs::time_domain::TimeMetrics;
 //!
-//! let rr_intervals = vec![800, 810, 780, 850, 900];
+//! let rr_intervals = vec![800., 810., 780., 850., 900.];
 //! let metrics = TimeMetrics::compute(&rr_intervals);
 //!
 //! println!("{:?}", metrics);
@@ -97,6 +97,8 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug> TimeMetrics<T> {
     /// # Example
     ///
     /// ```
+    /// use cardio_rs::time_domain::TimeMetrics;
+    ///
     /// let rr_intervals = vec![800.0, 820.0, 810.0, 780.0, 790.0];
     /// let metrics = TimeMetrics::compute(&rr_intervals);
     /// println!("{:?}", metrics);

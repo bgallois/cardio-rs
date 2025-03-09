@@ -211,7 +211,7 @@ dependencies = [
 
 [[package]]
 name = "cardio-rs"
-version = "0.1.0"
+version = "0.1.2"
 dependencies = [
  "approx",
  "arrayvec",
@@ -2108,7 +2108,8 @@ dependencies = [
 [[package]]
 name = "welch-sde"
 version = "0.1.0"
-source = "git+https://github.com/bgallois/welch-sde.git?branch=main#e1f4760e0aefc1139afa5a7f74be315bb217f519"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cf9e00ede58031fc5fefd05329aeb93ffbc195ca5416e35144f1eff3c196067"
 dependencies = [
  "num-complex",
  "num-traits",

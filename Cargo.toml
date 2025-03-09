@@ -1,10 +1,24 @@
 [package]
 name = "cardio-rs"
-version = "0.1.0"
+version = "0.1.2"
+authors = ["Benjamin Gallois <benjamin@gallois.cc>"]
+description = "A Rust library for computing heart rate variability (HRV) metrics from ECG and PPG data."
+homepage = "https://github.com/bgallois/cardio-rs"
+repository = "https://github.com/bgallois/cardio-rs"
+documentation = "https://docs.rs/cardio-rs"
+license = "MIT"
+readme = "README.md"
+keywords = ["HRV", "ECG", "PPG", "HR", "Variability"]
+categories = [
+  "science",
+  "science::neuroscience",
+  "mathematics",
+  "no-std",
+]
 edition = "2024"
 
 [features]
-default = []
+default = ["std"]
 std = [
   "arrayvec/std",
   "num/std",
@@ -12,17 +26,21 @@ std = [
   "welch-sde",
   "rand/std",
   "rand_distr/std",
+  "polars-lazy",
+  "polars",
+  "interp",
+  "find_peaks",
 ]
 
 [dependencies]
 arrayvec = { version = "0.7.6", default-features = false }
-find_peaks = "0.1.5"
-interp = "2.0.2"
+find_peaks = { version = "0.1.5", optional = true }
+interp = { version = "2.0.2", optional = true }
 libm = { version = "0.2.11", default-features = false }
 num = { version = "0.4.3" }
-polars = { version = "0.46.0", features = ["polars-io"] }
-polars-lazy = { version = "0.46.0", features = ["csv", "diff"] }
-welch-sde = { git = "https://github.com/bgallois/welch-sde.git", branch = "main", optional = true }
+polars = { version = "0.46.0", features = ["polars-io"], optional = true }
+polars-lazy = { version = "0.46.0", features = ["csv", "diff"], optional = true }
+welch-sde = { version = "0.1", optional = true }
 
 [dev-dependencies]
 approx = { version = "0.5"}
