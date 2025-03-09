@@ -1,3 +1,21 @@
+//! A module for computing heart rate variability (HRV) frequency-domain metrics (LF, HF, VLF).
+//!
+//! This module provides functionality to compute frequency-domain HRV metrics from a series of RR intervals, which are the time intervals between successive heartbeats.
+//! These metrics—Low Frequency (LF), High Frequency (HF), and Very Low Frequency (VLF)—are commonly used to analyze autonomic nervous system function and assess heart health.
+//!
+//! The module includes two primary functions:
+//! - `compute_sampled`: Computes HRV frequency-domain metrics based on a series of pre-sampled RR intervals.
+//! - `compute`: Computes HRV frequency-domain metrics by first interpolating raw RR intervals to a uniform sampling rate and then calculating spectral density.
+//!
+//! The HRV frequency-domain metrics provide insight into the balance between the sympathetic and parasympathetic branches of the autonomic nervous system. LF and HF are often used as markers of parasympathetic and sympathetic activity, respectively. VLF is associated with long-term variability and regulatory processes.
+//!
+//! # Notes
+//!
+//! - LF: Typically ranges from 0.04 Hz to 0.15 Hz and reflects the balance between the sympathetic and parasympathetic nervous systems.
+//! - HF: Typically ranges from 0.15 Hz to 0.40 Hz and is often associated with parasympathetic nervous system activity (specifically respiratory sinus arrhythmia).
+//! - VLF: Typically ranges from 0.003 Hz to 0.04 Hz and reflects long-term regulatory processes.
+//!
+//! The module uses Welch's periodogram method for estimating the power spectral density (PSD) and applies trapezoidal integration to compute the total power within each frequency band.
 #![cfg(feature = "std")]
 
 use core::iter::Sum;
@@ -5,10 +23,21 @@ use interp::{InterpMode, interp_slice};
 use num::Float;
 use welch_sde::{Build, SpectralDensity};
 
+/// A struct representing frequency-domain heart rate variability (HRV) metrics.
+///
+/// The `FrequenceMetrics` struct holds key frequency-domain parameters that are calculated from heart rate variability (HRV) data.
+/// These metrics are derived by analyzing the power spectral density (PSD) of the RR intervals, which can provide insights into the autonomic nervous system's regulation of the heart and overall cardiovascular health.
+///
+/// These frequency-domain metrics provide a deeper understanding of heart rate variability by focusing on the different frequency bands that reflect various physiological processes and autonomic nervous system regulation.
 #[derive(Debug, PartialEq, Clone, Copy)]
 pub struct FrequenceMetrics<T> {
+    /// Low Frequency (LF) power. Reflects sympathetic and parasympathetic balance, typically between 0.04 and 0.15 Hz.
     pub lf: T,
+
+    /// High Frequency (HF) power. Primarily associated with parasympathetic nervous system activity, typically between 0.15 and 0.40 Hz.
     pub hf: T,
+
+    /// Very Low Frequency (VLF) power. Represents the power of frequencies below 0.04 Hz, associated with long-term regulatory processes.
     pub vlf: T,
 }
 
@@ -32,6 +61,32 @@ impl<
         sum
     }
 
+    /// Computes frequency-domain metrics (LF, HF, VLF) from sampled RR intervals.
+    ///
+    /// The `compute_sampled` function computes the frequency-domain metrics of heart rate variability (HRV) using the Welch method for spectral density estimation.
+    /// It requires a list of sampled RR intervals and a specified sampling rate to estimate the power spectral density (PSD) and extract the frequency components in the low-frequency (LF), high-frequency (HF), and very low-frequency (VLF) bands.
+    ///
+    /// This method employs Welch's periodogram to calculate the spectral density, with specified frequency bands for LF, HF, and VLF, and computes the total power in these bands using trapezoidal integration.
+    ///
+    /// # Parameters
+    /// - `sampled_rr_intervals`: A slice of sampled RR intervals, representing the time differences between successive heartbeats, after being adjusted for the mean interval.
+    /// - `rate`: The sampling rate used to interpolate the RR intervals, expressed in Hz.
+    ///
+    /// # Returns
+    /// A `FrequenceMetrics` struct containing the computed LF, HF, and VLF values, which represent the power in their respective frequency bands.
+    ///
+    /// # Example
+    /// ```
+    /// let sampled_rr_intervals = vec![0.85, 0.82, 0.80, 0.79];
+    /// let rate = 4.0;
+    /// let frequency_metrics = compute_sampled(&sampled_rr_intervals, rate);
+    /// ```
+    ///
+    /// # Notes
+    /// The frequency bands for LF, HF, and VLF are typically:
+    /// - LF: 0.04 - 0.15 Hz
+    /// - HF: 0.15 - 0.40 Hz
+    /// - VLF: 0.003 - 0.04 Hz
     pub fn compute_sampled(sampled_rr_intervals: &[T], rate: T) -> Self {
         // TODO change welch crate to match scipy welch windows
         let n_seg = std::cmp::max(1, sampled_rr_intervals.len() / 150);
@@ -113,6 +168,25 @@ impl<
         }
     }
 
+    /// Computes frequency-domain metrics (LF, HF, VLF) from raw RR intervals by first interpolating them.
+    ///
+    /// The `compute` function computes the frequency-domain metrics of heart rate variability (HRV) based on raw RR intervals by first interpolating them to a uniform 4 Hz rate.
+    /// It utilizes the `compute_sampled` function to estimate the spectral density of the interpolated RR intervals, providing the LF, HF, and VLF values.
+    ///
+    /// # Parameters
+    /// - `rr_intervals`: A slice of raw RR intervals, representing the time differences between successive heartbeats.
+    ///
+    /// # Returns
+    /// A `FrequenceMetrics` struct containing the computed LF, HF, and VLF values, which represent the power in their respective frequency bands.
+    ///
+    /// # Example
+    /// ```
+    /// let rr_intervals = vec![0.85, 0.82, 0.80, 0.79];
+    /// let frequency_metrics = compute(&rr_intervals);
+    /// ```
+    ///
+    /// # Notes
+    /// This method interpolates the RR intervals using a specified rate (defaulted to 4 Hz) before passing them to the `compute_sampled` method for spectral analysis.
     pub fn compute(rr_intervals: &[T]) -> Self {
         let x = rr_intervals
             .iter()
