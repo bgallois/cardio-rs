@@ -74,16 +74,8 @@ pub trait DetectOutliers<T> {
     fn detect_ectopics(&mut self, method: EctopicMethod);
 }
 
-impl<
-    T: Float
-        + Sum<T>
-        + Copy
-        + core::fmt::Debug
-        + welch_sde::Signal
-        + num::Signed
-        + 'static
-        + num::FromPrimitive,
-> DetectOutliers<T> for RRIntervals<T>
+impl<T: Float + Sum<T> + Copy + core::fmt::Debug + num::Signed + 'static + num::FromPrimitive>
+    DetectOutliers<T> for RRIntervals<T>
 {
     /// Detects outliers in the RR intervals based on the given `lowest_rr` and `highest_rr`.
     ///
