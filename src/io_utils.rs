@@ -1,5 +1,7 @@
-//! A module providing functionality for processing and analyzing time series data from CSV file, particularly for extracting RR intervals
-//! from physiological signals such as ECG and PPG. It defines the `Data` struct for handling the processed data and the
+//! A module providing functionality for processing and analyzing time series data from CSV files, particularly for extracting RR intervals
+//! from physiological signals such as ECG and PPG.
+//!
+//! It defines the `Data` struct for handling the processed data and the
 //! `DataBuilder` struct for building and configuring data sources.
 //!
 //! ## Key Components:

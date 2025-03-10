@@ -40,6 +40,7 @@ The library also provides functions for processing raw ECG and PPG data, includi
 ```rust
 use cardio_rs::processing_utils::{RRIntervals, EctopicMethod, DetectOutliers};
 use cardio_rs::time_domain::TimeMetrics;
+use cardio_rs::geometric_domain::GeometricMetrics;
 use cardio_rs::frequence_domain::FrequenceMetrics;
 
 let mut rr_intervals = RRIntervals::new(vec![800.0, 850.0, 900.0, 600.0, 800.0, 820.0, 840.0]);
@@ -52,4 +53,20 @@ println!("{:?}", frequency_metrics);
 
 let time_metrics = TimeMetrics::compute(rr_intervals.as_slice());
 println!("{:?}", time_metrics);
+
+let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());
+println!("{:?}", time_metrics);
+```
+
+```rust
+use cardio_rs::io_utils::{DataBuilder, Data};
+
+let path = "path/to/data.csv";
+let signal = "ECG_Raw";
+let time = "Time";
+let data = DataBuilder::new(path.into(), signal.into())
+    .with_time(time.into())
+    .build()
+    .unwrap();
+let rr_intervals = data.get_rr();
 ```

@@ -1,4 +1,4 @@
-//! A module for computing heart rate variability (HRV) frequency-domain metrics (LF, HF, VLF).
+//! A module for computing heart rate variability (HRV) frequency-domain metrics.
 //!
 //! This module provides functionality to compute frequency-domain HRV metrics from a series of RR intervals, which are the time intervals between successive heartbeats.
 //! These metrics—Low Frequency (LF), High Frequency (HF), and Very Low Frequency (VLF)—are commonly used to analyze autonomic nervous system function and assess heart health.

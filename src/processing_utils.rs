@@ -1,4 +1,5 @@
 //! A module providing functionality for detecting and handling outliers and ectopic beats in a series of RR intervals.
+//!
 //! It defines the `RRIntervals` struct which contains a vector of RR intervals, and optional fields to store indices of
 //! detected outliers and ectopic beats. The module also provides a trait `DetectOutliers` which can be implemented to detect
 //! outliers and ectopic beats using custom methods, while default implementations for detecting outliers and ectopic beats

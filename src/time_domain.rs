@@ -1,4 +1,4 @@
-//! A module for calculating and storing time-domain heart rate variability (HRV) metrics.
+//! A module for computing time-domain heart rate variability (HRV) metrics.
 //!
 //! This module defines the `TimeMetrics` struct, which holds various HRV parameters derived from RR intervals.
 //! These time-domain metrics are essential for evaluating the autonomic nervous system's regulation of the heart and understanding heart rate variability over time.
@@ -29,12 +29,9 @@
 //!
 //! println!("{:?}", metrics);
 //! ```
-pub mod time_metrics {
-    // The TimeMetrics struct and the compute function would be inside this module.
-    // The rest of the code goes here...
-}
 
 extern crate alloc;
+#[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use core::iter::Sum;
 use num::Float;

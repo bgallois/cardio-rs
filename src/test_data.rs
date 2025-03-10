@@ -1,4 +1,5 @@
 //! A module containing predefined test data that can be used to validate the functionality of the `RRIntervals` module
+//!
 //! and any other related code. The data includes various sets of RR intervals that can be used for testing, such as
 //! typical RR intervals, outlier cases, and ectopic beats cases.
 #[cfg(test)]
