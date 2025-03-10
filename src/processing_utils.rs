@@ -91,7 +91,7 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug + num::Signed + 'static + num::
     /// # Example
     ///
     /// ```rust
-    /// use cardio_rs::{RRIntervals, DetectOutliers};
+    /// use cardio_rs::processing_utils::{RRIntervals, DetectOutliers};
     ///
     /// let mut rr_intervals = RRIntervals::new(vec![800.0, 850.0, 3000.0, 600.0, 800.0]);
     /// rr_intervals.detect_outliers(&300.0, &2000.0);
@@ -127,7 +127,7 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug + num::Signed + 'static + num::
     /// # Example
     ///
     /// ```rust
-    /// use cardio_rs::{RRIntervals, EctopicMethod, DetectOutliers};
+    /// use cardio_rs::processing_utils::{RRIntervals, EctopicMethod, DetectOutliers};
     ///
     /// let mut rr_intervals = RRIntervals::new(vec![800.0, 850.0, 900.0, 600.0, 800.0]);
     /// rr_intervals.detect_ectopics(EctopicMethod::Karlsson);

@@ -66,6 +66,8 @@ where
     ///
     /// ## Example:
     /// ```rust
+    /// use cardio_rs::geometric_domain::GeometricMetrics;
+    ///
     /// let rr_intervals = vec![800.0, 850.0, 900.0, 950.0, 1000.0, 1100.0];
     /// let geometric_metrics = GeometricMetrics::<f64>::compute(&rr_intervals);
     /// println!("{:?}", geometric_metrics);  // Output: GeometricMetrics { triangular_index: 1.2, tinn: 12.0 }

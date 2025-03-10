@@ -1,4 +1,4 @@
-# HRV Metrics
+# CARDIO-RS
 
 A Rust library for computing heart rate variability (HRV) time-domain and frequency-domain metrics from RR intervals. The library provides functions for computing various HRV parameters, such as SDNN, RMSSD, LF, HF, VLF, and others, which are commonly used to assess autonomic nervous system function and heart health.
 
@@ -42,8 +42,9 @@ use cardio_rs::processing_utils::{RRIntervals, EctopicMethod, DetectOutliers};
 use cardio_rs::time_domain::TimeMetrics;
 use cardio_rs::geometric_domain::GeometricMetrics;
 use cardio_rs::frequence_domain::FrequenceMetrics;
+use cardio_rs::test_data::test_data::RR_INTERVALS;
 
-let mut rr_intervals = RRIntervals::new(vec![800.0, 850.0, 900.0, 600.0, 800.0, 820.0, 840.0]);
+let mut rr_intervals = RRIntervals::new(RR_INTERVALS.to_vec());
 rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
 rr_intervals.detect_outliers(&300., &2_000.);
 rr_intervals.remove_outliers_ectopics();
@@ -61,7 +62,7 @@ println!("{:?}", time_metrics);
 ```rust
 use cardio_rs::io_utils::{DataBuilder, Data};
 
-let path = "path/to/data.csv";
+let path = "tests/ecg.csv";
 let signal = "ECG_Raw";
 let time = "Time";
 let data = DataBuilder::new(path.into(), signal.into())

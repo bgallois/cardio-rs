@@ -23,7 +23,7 @@
 //! ```rust
 //! use cardio_rs::io_utils::{DataBuilder, Data};
 //!
-//! let path = "path/to/data.csv";
+//! let path = "tests/ecg.csv";
 //! let signal = "ECG_Raw";
 //! let time = "Time";
 //!
@@ -38,7 +38,7 @@
 //! ```rust
 //! use cardio_rs::io_utils::{DataBuilder, Data};
 //!
-//! let path = "path/to/data.csv";
+//! let path = "tests/ecg.csv";
 //! let signal = "ECG_Raw";
 //!
 //! let data = DataBuilder::new(path.into(), signal.into())

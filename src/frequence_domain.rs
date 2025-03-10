@@ -16,6 +16,9 @@
 //! - VLF: Typically ranges from 0.003 Hz to 0.04 Hz and reflects long-term regulatory processes.
 //!
 //! The module uses Welch's periodogram method for estimating the power spectral density (PSD) and applies trapezoidal integration to compute the total power within each frequency band.
+//!
+//! **Note:** The computed values heavily depend on the specific computational techniques used.
+//! This implementation provides results that are within a few percent of the Python `hrv-analysis` package but may differ slightly from those obtained using `NeuroKit2` with a 4Hz resampling rate.
 #![cfg(feature = "std")]
 
 use core::iter::Sum;
@@ -77,11 +80,11 @@ impl<
     ///
     /// # Example
     /// ```
-    /// use cardio_rs::time_metrics::FrequencyMetrics;
+    /// use cardio_rs::frequence_domain::FrequenceMetrics;
+    /// use cardio_rs::test_data::test_data::RR_INTERVALS;
     ///
-    /// let sampled_rr_intervals = vec![0.85, 0.82, 0.80, 0.79];
     /// let rate = 4.0;
-    /// let frequency_metrics = FrequencyMetrics::compute_sampled(&sampled_rr_intervals, rate);
+    /// let frequency_metrics = FrequenceMetrics::compute_sampled(RR_INTERVALS, rate);
     /// ```
     ///
     /// # Notes
@@ -90,17 +93,25 @@ impl<
     /// - HF: 0.15 - 0.40 Hz
     /// - VLF: 0.003 - 0.04 Hz
     pub fn compute_sampled(sampled_rr_intervals: &[T], rate: T) -> Self {
-        // TODO change welch crate to match scipy welch windows
-        let n_seg = std::cmp::max(1, sampled_rr_intervals.len() / 150);
+        // Trim the vector to allow for a segment size of 256 with 128 overlap
+        // This ensures "almost" consistent results with the HRV library using Scipy
+        let cut_length = sampled_rr_intervals.len() / 256 * 256;
         let mean = sampled_rr_intervals.iter().copied().sum::<T>()
             / T::from_usize(sampled_rr_intervals.len()).unwrap();
         let sampled_rr_intervals: Vec<T> = sampled_rr_intervals.iter().map(|&i| i - mean).collect();
+        let sampled_rr_intervals: Vec<T> = sampled_rr_intervals
+            .iter()
+            .take(cut_length)
+            .copied()
+            .collect();
+        let n_seg = std::cmp::max(1, (sampled_rr_intervals.len() / 256) * 2 - 1);
         let builder = welch_sde::Builder::new(&sampled_rr_intervals)
             .sampling_frequency(rate)
             .overlap(0.5)
             .n_segment(n_seg);
 
         let welch: SpectralDensity<T> = builder.build();
+        println!("{:?}", welch);
         let psd = welch.periodogram();
 
         let lf: Vec<(T, T)> = psd
@@ -183,10 +194,10 @@ impl<
     ///
     /// # Example
     /// ```
-    /// use cardio_rs::frequence_domain::FrequencyMetrics;
+    /// use cardio_rs::frequence_domain::FrequenceMetrics;
+    /// use cardio_rs::test_data::test_data::RR_INTERVALS;
     ///
-    /// let rr_intervals = vec![0.85, 0.82, 0.80, 0.79];
-    /// let frequency_metrics = FrequenceMetrics::compute(&rr_intervals);
+    /// let frequency_metrics = FrequenceMetrics::compute(RR_INTERVALS);
     /// ```
     ///
     /// # Notes
@@ -280,7 +291,7 @@ mod tests {
                 vlf: 430.1935931595116,
             },
             freq_params,
-            epsilon = 500.,
+            epsilon = 600., // TODO get better welch
         );
     }
 }

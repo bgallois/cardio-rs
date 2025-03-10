@@ -2,7 +2,6 @@
 //!
 //! and any other related code. The data includes various sets of RR intervals that can be used for testing, such as
 //! typical RR intervals, outlier cases, and ectopic beats cases.
-#[cfg(test)]
 pub mod test_data {
     pub const RR_INTERVALS: &[f64] = &[
         887.0, 944.0, 945.0, 941.0, 923.0, 984.0, 924.0, 884.0, 940.0, 796.0, 875.0, 816.0, 812.0,
