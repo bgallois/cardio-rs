@@ -1,5 +1,4 @@
 //! A module providing functionality for detecting and handling outliers and ectopic beats in a series of RR intervals.
-//!
 //! It defines the `RRIntervals` struct which contains a vector of RR intervals, and optional fields to store indices of
 //! detected outliers and ectopic beats. The module also provides a trait `DetectOutliers` which can be implemented to detect
 //! outliers and ectopic beats using custom methods, while default implementations for detecting outliers and ectopic beats
@@ -20,7 +19,7 @@
 //! ## Example Usage:
 //!
 //! ```rust
-//! use cardio_rs::{RRIntervals, EctopicMethod, DetectOutliers};
+//! use cardio_rs::processing_utils::{RRIntervals, EctopicMethod, DetectOutliers};
 //!
 //! let mut rr_intervals = RRIntervals::new(vec![800.0, 850.0, 3000.0, 600.0, 800.0]);
 //! rr_intervals.detect_outliers(&300.0, &2000.0);  // Detect outliers based on specified range

@@ -183,7 +183,7 @@ impl<
     ///
     /// # Example
     /// ```
-    /// use cardio_rs::time_metrics::FrequencyMetrics;
+    /// use cardio_rs::frequence_domain::FrequencyMetrics;
     ///
     /// let rr_intervals = vec![0.85, 0.82, 0.80, 0.79];
     /// let frequency_metrics = FrequenceMetrics::compute(&rr_intervals);
