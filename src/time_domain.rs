@@ -156,10 +156,7 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug> TimeMetrics<T> {
 mod tests {
     use super::*;
     use crate::test_data::test_data::RR_INTERVALS;
-    use approx::AbsDiffEq;
-    use approx::RelativeEq;
-    use approx::UlpsEq;
-    use approx::assert_relative_eq;
+    use approx::{AbsDiffEq, RelativeEq, UlpsEq, assert_relative_eq};
     impl<T: AbsDiffEq> AbsDiffEq for TimeMetrics<T>
     where
         T::Epsilon: Copy,

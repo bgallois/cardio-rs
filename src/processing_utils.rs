@@ -36,8 +36,10 @@
 #![cfg(feature = "std")]
 
 use num::Float;
-use std::iter::Sum;
-use std::ops::{Deref, DerefMut};
+use std::{
+    iter::Sum,
+    ops::{Deref, DerefMut},
+};
 
 /// Enum representing different methods for detecting ectopic beats in RR intervals.
 ///

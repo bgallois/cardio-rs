@@ -50,17 +50,16 @@
 //! ```
 #![cfg(feature = "std")]
 use find_peaks::PeakFinder;
-use polars::datatypes::DataType;
-use polars::frame::DataFrame;
-use polars::prelude::CsvReadOptions;
-use polars::prelude::NamedFrom;
-use polars::prelude::PolarsError;
-use polars::prelude::SerReader;
-use polars::series::Series;
-use polars_lazy::frame::IntoLazy;
-use polars_lazy::prelude::LazyFrame;
-use polars_lazy::prelude::col;
-use polars_lazy::prelude::lit;
+use polars::{
+    datatypes::DataType,
+    frame::DataFrame,
+    prelude::{CsvReadOptions, NamedFrom, PolarsError, SerReader},
+    series::Series,
+};
+use polars_lazy::{
+    frame::IntoLazy,
+    prelude::{LazyFrame, col, lit},
+};
 use std::path::PathBuf;
 
 /// `Data` represents a collection of time series data processed lazily.

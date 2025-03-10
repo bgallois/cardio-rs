@@ -1,6 +1,6 @@
 [package]
 name = "cardio-rs"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Benjamin Gallois <benjamin@gallois.cc>"]
 description = "A Rust library for computing heart rate variability (HRV) metrics from ECG and PPG data."
 homepage = "https://github.com/bgallois/cardio-rs"
