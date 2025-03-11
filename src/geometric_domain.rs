@@ -108,7 +108,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::test_data::RR_INTERVALS;
+    use crate::test_data::RR_INTERVALS;
     use approx::{AbsDiffEq, RelativeEq, UlpsEq, assert_relative_eq};
     impl<T: AbsDiffEq> AbsDiffEq for GeometricMetrics<T>
     where
@@ -164,7 +164,7 @@ mod tests {
 
     #[test]
     fn test_metrics() {
-        let geo_params = GeometricMetrics::compute(&RR_INTERVALS);
+        let geo_params = GeometricMetrics::compute(RR_INTERVALS);
 
         assert_relative_eq!(
             GeometricMetrics {

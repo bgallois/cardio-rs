@@ -81,7 +81,7 @@ impl<
     /// # Example
     /// ```
     /// use cardio_rs::frequence_domain::FrequenceMetrics;
-    /// use cardio_rs::test_data::test_data::RR_INTERVALS;
+    /// use cardio_rs::test_data::RR_INTERVALS;
     ///
     /// let rate = 4.0;
     /// let frequency_metrics = FrequenceMetrics::compute_sampled(RR_INTERVALS, rate);
@@ -195,7 +195,7 @@ impl<
     /// # Example
     /// ```
     /// use cardio_rs::frequence_domain::FrequenceMetrics;
-    /// use cardio_rs::test_data::test_data::RR_INTERVALS;
+    /// use cardio_rs::test_data::RR_INTERVALS;
     ///
     /// let frequency_metrics = FrequenceMetrics::compute(RR_INTERVALS);
     /// ```
@@ -225,7 +225,7 @@ impl<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::test_data::RR_INTERVALS;
+    use crate::test_data::RR_INTERVALS;
     use approx::{AbsDiffEq, RelativeEq, UlpsEq, assert_relative_eq};
 
     impl<T: AbsDiffEq> AbsDiffEq for FrequenceMetrics<T>
@@ -277,7 +277,7 @@ mod tests {
 
     #[test]
     fn test_frequency_metrics() {
-        let freq_params = FrequenceMetrics::compute(&RR_INTERVALS);
+        let freq_params = FrequenceMetrics::compute(RR_INTERVALS);
 
         // TODO: comparaison is done https://github.com/Aura-healthcare/hrv-analysis
         // seems to not be the same as neurokit2

@@ -155,13 +155,9 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug + num::Signed + 'static + num::
                 })
                 .collect(),
             EctopicMethod::Acar => (9..self.len())
-                .filter_map(|i| {
+                .filter(|&i| {
                     let mean = (self[i - 9..i].iter().cloned().sum::<T>()) / T::from(9).unwrap();
-                    if (mean - self[i]).abs() >= T::from(0.2).unwrap() * mean {
-                        Some(i)
-                    } else {
-                        None
-                    }
+                    (mean - self[i]).abs() >= T::from(0.2).unwrap() * mean
                 })
                 .collect(),
         };
@@ -248,7 +244,7 @@ impl<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::test_data::RR_INTERVALS;
+    use crate::test_data::RR_INTERVALS;
 
     #[test]
     fn test_remove_none() {
