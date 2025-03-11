@@ -27,9 +27,10 @@
 //! ## Struct and Method Documentation:
 //! - `GeometricMetrics<T>`: A struct that holds two HRV metrics: `triangular_index` and `tinn`.
 //! - `compute()`: A method that takes a slice of RR intervals and computes the `triangular_index` and `tinn` based on the provided intervals.
+#[cfg(not(feature = "std"))]
 extern crate alloc;
 #[cfg(not(feature = "std"))]
-use alloc::vec::Vec;
+use alloc::vec;
 
 use core::iter::Sum;
 use num::Float;
@@ -46,7 +47,7 @@ pub struct GeometricMetrics<T> {
     pub tinn: T,
 }
 
-impl<T: Float + Sum<T> + Copy + core::fmt::Debug + std::ops::AddAssign> GeometricMetrics<T>
+impl<T: Float + Sum<T> + Copy + core::fmt::Debug + core::ops::AddAssign> GeometricMetrics<T>
 where
     f64: From<T>,
 {
@@ -94,7 +95,8 @@ where
         // TODO can use more precise method
         let epsilon = *mode * T::from(0.75).unwrap();
         let base_left = hist.iter().position(|&i| i > epsilon).unwrap();
-        let base_right = hist.len() - 1 - hist.iter().rev().position(|&i| i > epsilon).unwrap();
+        let base_right =
+            hist.len() - 1usize - hist.iter().rev().position(|&i| i > epsilon).unwrap();
 
         let tinn = T::from(base_right - base_left).unwrap() * bin_width;
 

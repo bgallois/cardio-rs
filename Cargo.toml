@@ -1,6 +1,6 @@
 [package]
 name = "cardio-rs"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Benjamin Gallois <benjamin@gallois.cc>"]
 description = "A Rust library for computing heart rate variability (HRV) metrics from ECG and PPG data."
 homepage = "https://github.com/bgallois/cardio-rs"
@@ -34,13 +34,13 @@ std = [
 
 [dependencies]
 arrayvec = { version = "0.7.6", default-features = false }
-find_peaks = { version = "0.1.5", optional = true }
+find_peaks = { version = "0.1.5", optional = true, default-features = false }
 interp = { version = "2.0.2", optional = true }
 libm = { version = "0.2.11", default-features = false }
-num = { version = "0.4.3" }
-polars = { version = "0.46.0", features = ["polars-io"], optional = true }
-polars-lazy = { version = "0.46.0", features = ["csv", "diff"], optional = true }
-welch-sde = { version = "0.1", optional = true }
+num = { version = "0.4.3", default-features = false, features = ["libm"] }
+polars = { version = "0.46.0", features = ["polars-io"], optional = true, default-features = false }
+polars-lazy = { version = "0.46.0", features = ["csv", "diff"], optional = true, default-features = false }
+welch-sde = { version = "0.1", optional = true, default-features = false }
 
 [dev-dependencies]
 approx = { version = "0.5"}
