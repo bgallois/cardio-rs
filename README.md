@@ -68,7 +68,7 @@ use cardio_rs::{
     time_domain::TimeMetrics,
     geometric_domain::GeometricMetrics,
     frequency_domain::FrequencyMetrics,
-    io_utils::{DataBuilder, Data},
+    io_utils::{DataBuilder},
 };
 
 let path = "tests/ecg.csv";
@@ -84,11 +84,11 @@ rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
 rr_intervals.detect_outliers(&300., &2_000.);
 rr_intervals.remove_outliers_ectopics();
 
-let freq_metrics = FrequencyMetrics::compute(rr_intervals.as_slice());
-println!("{:?}", freq_metrics);
-
 let time_metrics = TimeMetrics::compute(rr_intervals.as_slice());
 println!("{:?}", time_metrics);
+
+let frequency_metrics = FrequencyMetrics::compute(rr_intervals.as_slice(), 10.);
+println!("{:?}", frequency_metrics);
 
 let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());
 println!("{:?}", geo_metrics);

@@ -104,14 +104,16 @@ impl<
             .take(cut_length)
             .copied()
             .collect();
-        let n_seg = std::cmp::max(1, (sampled_rr_intervals.len() / 256) * 2 - 1);
+        let n_seg = std::cmp::max(
+            1,
+            ((sampled_rr_intervals.len() / 256) * 2).saturating_sub(1),
+        );
         let builder = welch_sde::Builder::new(&sampled_rr_intervals)
             .sampling_frequency(rate)
             .overlap(0.5)
             .n_segment(n_seg);
 
         let welch: SpectralDensity<T> = builder.build();
-        println!("{:?}", welch);
         let psd = welch.periodogram();
 
         let lf: Vec<(T, T)> = psd
@@ -188,6 +190,7 @@ impl<
     ///
     /// # Parameters
     /// - `rr_intervals`: A slice of raw RR intervals, representing the time differences between successive heartbeats.
+    /// - `rate`: The sampling rate used to interpolate the RR intervals, expressed in Hz.
     ///
     /// # Returns
     /// A `FrequencyMetrics` struct containing the computed LF, HF, and VLF values, which represent the power in their respective frequency bands.
@@ -197,12 +200,12 @@ impl<
     /// use cardio_rs::frequency_domain::FrequencyMetrics;
     /// use cardio_rs::test_data::RR_INTERVALS;
     ///
-    /// let frequency_metrics = FrequencyMetrics::compute(RR_INTERVALS);
+    /// let frequency_metrics = FrequencyMetrics::compute(RR_INTERVALS, 4.);
     /// ```
     ///
     /// # Notes
     /// This method interpolates the RR intervals using a specified rate (defaulted to 4 Hz) before passing them to the `compute_sampled` method for spectral analysis.
-    pub fn compute(rr_intervals: &[T]) -> Self {
+    pub fn compute(rr_intervals: &[T], rate: T) -> Self {
         let x = rr_intervals
             .iter()
             .scan(T::from(0).unwrap(), |s, &i| {
@@ -211,7 +214,6 @@ impl<
             })
             .map(|i| (i - rr_intervals[0]) / T::from(1_000).unwrap())
             .collect::<Vec<T>>();
-        let rate = T::from(4).unwrap();
         let step = *x.last().unwrap() * rate;
         let xp = (0..step.to_f64().unwrap() as u64)
             .map(|i| T::from(i).unwrap() / rate)
@@ -277,7 +279,7 @@ mod tests {
 
     #[test]
     fn test_frequency_metrics() {
-        let freq_params = FrequencyMetrics::compute(RR_INTERVALS);
+        let freq_params = FrequencyMetrics::compute(RR_INTERVALS, 4.);
 
         // TODO: comparaison is done https://github.com/Aura-healthcare/hrv-analysis
         // seems to not be the same as neurokit2
