@@ -1,66 +1,75 @@
-# CARDIO-RS
+# ❤️⚡ CARDIO-RS ⚡❤️  
+*A Rust library for Heart Rate Variability (HRV) analysis!*  
 
-A Rust library for computing heart rate variability (HRV) time-domain and frequency-domain metrics from RR intervals. The library provides functions for computing various HRV parameters, such as SDNN, RMSSD, LF, HF, VLF, and others, which are commonly used to assess autonomic nervous system function and heart health.
+[![Docs.rs](https://docs.rs/cardio-rs/badge.svg)](https://docs.rs/cardio-rs)  [![CI](https://github.com/bgallois/cardio-rs/actions/workflows/test.yml/badge.svg)](https://github.com/bgallois/cardio-rs/actions/)[![Crates.io](https://img.shields.io/crates/v/cardio-rs.svg)](https://crates.io/crates/cardio-rs)
 
-Additionally, the library offers functions for **ECG and PPG data processing and cleaning** to support accurate HRV measurements from different data sources.
+📊 **Compute HRV time-domain & frequency-domain & geometric-domain metrics** from RR intervals with ease!  
+💓 **Preprocess ECG & PPG raw data** for accurate HRV analysis!  
+📟 **Supports embedded systems** with `no_std` (work in progress 🚧)!  
 
-## Features
+> **Note:** Not all functionalities are `no_std` yet, but I’m working on it! 🛠️  
 
-- **Time-domain HRV metrics**: Compute SDNN, RMSSD, PNN50, SDSD, and mean heart rate (HR).
-- **Frequency-domain HRV metrics**: Compute LF, HF, and VLF using Welch's method for power spectral density estimation.
-- **ECG and PPG data processing**: Preprocess raw ECG and PPG signals for accurate HRV computation, including filtering, denoising, and R-wave peak detection for ECG and pulse detection for PPG.
-- **Supports both raw and interpolated RR intervals**: Functions for both raw RR intervals and interpolated RR intervals with a specified sampling rate.
-- **`no_std` compatible**: The library is designed to work in `no_std` environments, making it suitable for embedded systems.
+---
 
-## Time-domain Metrics
+## ✨ Features  
 
-The following time-domain HRV metrics are computed:
-- **RMSSD**: Root Mean Square of Successive Differences. Measures short-term HRV.
-- **SDNN**: Standard Deviation of NN Intervals. Measures overall HRV.
-- **PNN50**: Percentage of Successive RR Intervals > 50 ms. Indicates parasympathetic nervous system activity.
-- **SDSD**: Standard Deviation of Successive Differences. Measures short-term HRV by calculating the standard deviation of differences between successive RR intervals.
-- **Mean HR**: The average heart rate computed from RR intervals.
-- **AVNN**: Average NN Interval, which represents the mean of RR intervals.
+✅ **Time-domain HRV metrics**: SDNN, RMSSD, PNN50, SDSD, CVSD, and more!  
+✅ **Frequency-domain HRV metrics**: LF, HF, VLF using Welch’s method!  
+✅ **Geometric-domain HRV metrics**: Triangular Index & TINN!  
+✅ **ECG & PPG preprocessing**: Filtering, denoising, peak detection!  
+✅ **Raw & interpolated RR intervals** supported!  
+✅ **🚀 `no_std` compatibility** (in progress)!  
 
-## Frequency-domain Metrics
+---
 
-The following frequency-domain HRV metrics are computed using Welch’s method for spectral density estimation:
-- **LF**: Low Frequency power. Reflects the balance between sympathetic and parasympathetic nervous systems (0.04 - 0.15 Hz).
-- **HF**: High Frequency power. Primarily associated with parasympathetic nervous system activity (0.15 - 0.40 Hz).
-- **VLF**: Very Low Frequency power. Reflects long-term regulatory processes (0.003 - 0.04 Hz).
+## 📏 Time-domain HRV Metrics  
 
-## ECG and PPG Data Processing and Cleaning
+- 🔹 **RMSSD** – Measures short-term HRV.  
+- 🔹 **SDNN** – Measures overall HRV.  
+- 🔹 **PNN50** – Percentage of successive RR intervals > 50ms.  
+- 🔹 **SDSD** – Standard deviation of successive differences.  
+- 🔹 **Mean HR** – Average heart rate.  
+- 🔹 **AVNN** – Mean of all RR intervals.  
+- 🔹 **CVSD** – RMSSD divided by the mean RR interval.  
 
-The library also provides functions for processing raw ECG and PPG data, including:
-- **ECG Data Processing**: Includes algorithms for filtering and detecting R-wave peaks for RR interval extraction, which can be used to compute HRV metrics.
-- **PPG Data Processing**: Includes preprocessing techniques for PPG signals, such as pulse detection and signal cleaning, which can also be used to extract RR intervals and calculate HRV metrics.
+---
 
-## Example
+## 📐 Geometric-domain HRV Metrics  
+
+- 📊 **Triangular Index** – Measures RR interval distribution.  
+- 📊 **TINN (Triangular Interpolation of NN Interval Histogram)** – Estimates RR variability.  
+
+---
+
+## 🎵 Frequency-domain HRV Metrics  
+
+📡 Computed using **Welch’s method** for spectral density estimation:  
+
+- 🎼 **LF (Low Frequency)** – Sympathetic & parasympathetic balance (**0.04 - 0.15 Hz**).  
+- 🎼 **HF (High Frequency)** – Parasympathetic activity (**0.15 - 0.40 Hz**).  
+- 🎼 **VLF (Very Low Frequency)** – Long-term regulatory processes (**0.003 - 0.04 Hz**).  
+
+---
+
+## 🏥 ECG & PPG Data Processing  
+
+📡 **ECG Processing** – R-wave peak detection, filtering, and RR extraction!  
+💡 **PPG Processing** – Pulse detection & signal cleaning for HRV computation!  
+
+---
+
+## 🦀 Example Usage  
+
+### 🚀 Compute HRV Metrics & Load ECG Data  
 
 ```rust
-use cardio_rs::processing_utils::{RRIntervals, EctopicMethod, DetectOutliers};
-use cardio_rs::time_domain::TimeMetrics;
-use cardio_rs::geometric_domain::GeometricMetrics;
-use cardio_rs::frequence_domain::FrequenceMetrics;
-use cardio_rs::test_data::test_data::RR_INTERVALS;
-
-let mut rr_intervals = RRIntervals::new(RR_INTERVALS.to_vec());
-rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
-rr_intervals.detect_outliers(&300., &2_000.);
-rr_intervals.remove_outliers_ectopics();
-
-let frequency_metrics = FrequenceMetrics::compute(rr_intervals.as_slice());
-println!("{:?}", frequency_metrics);
-
-let time_metrics = TimeMetrics::compute(rr_intervals.as_slice());
-println!("{:?}", time_metrics);
-
-let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());
-println!("{:?}", time_metrics);
-```
-
-```rust
-use cardio_rs::io_utils::{DataBuilder, Data};
+use cardio_rs::{
+    processing_utils::{RRIntervals, EctopicMethod, DetectOutliers},
+    time_domain::TimeMetrics,
+    geometric_domain::GeometricMetrics,
+    frequency_domain::FrequencyMetrics,
+    io_utils::{DataBuilder, Data},
+};
 
 let path = "tests/ecg.csv";
 let signal = "ECG_Raw";
@@ -69,5 +78,20 @@ let data = DataBuilder::new(path.into(), signal.into())
     .with_time(time.into())
     .build()
     .unwrap();
-let rr_intervals = data.get_rr();
+let mut rr_intervals = RRIntervals::new(data.get_rr());
+
+rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
+rr_intervals.detect_outliers(&300., &2_000.);
+rr_intervals.remove_outliers_ectopics();
+
+let freq_metrics = FrequencyMetrics::compute(rr_intervals.as_slice());
+println!("{:?}", freq_metrics);
+
+let time_metrics = TimeMetrics::compute(rr_intervals.as_slice());
+println!("{:?}", time_metrics);
+
+let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());
+println!("{:?}", geo_metrics);
 ```
+
+🔥 **Start analyzing HRV today with cardio-rs!** 🚀💓

@@ -28,12 +28,12 @@ use welch_sde::{Build, SpectralDensity};
 
 /// A struct representing frequency-domain heart rate variability (HRV) metrics.
 ///
-/// The `FrequenceMetrics` struct holds key frequency-domain parameters that are calculated from heart rate variability (HRV) data.
+/// The `FrequencyMetrics` struct holds key frequency-domain parameters that are calculated from heart rate variability (HRV) data.
 /// These metrics are derived by analyzing the power spectral density (PSD) of the RR intervals, which can provide insights into the autonomic nervous system's regulation of the heart and overall cardiovascular health.
 ///
 /// These frequency-domain metrics provide a deeper understanding of heart rate variability by focusing on the different frequency bands that reflect various physiological processes and autonomic nervous system regulation.
 #[derive(Debug, PartialEq, Clone, Copy)]
-pub struct FrequenceMetrics<T> {
+pub struct FrequencyMetrics<T> {
     /// Low Frequency (LF) power. Reflects sympathetic and parasympathetic balance, typically between 0.04 and 0.15 Hz.
     pub lf: T,
 
@@ -53,7 +53,7 @@ impl<
         + num::Signed
         + 'static
         + num::FromPrimitive,
-> FrequenceMetrics<T>
+> FrequencyMetrics<T>
 {
     fn trapezoidal(x: &[T], y: &[T]) -> T {
         let mut sum = T::from(0).unwrap();
@@ -76,15 +76,15 @@ impl<
     /// - `rate`: The sampling rate used to interpolate the RR intervals, expressed in Hz.
     ///
     /// # Returns
-    /// A `FrequenceMetrics` struct containing the computed LF, HF, and VLF values, which represent the power in their respective frequency bands.
+    /// A `FrequencyMetrics` struct containing the computed LF, HF, and VLF values, which represent the power in their respective frequency bands.
     ///
     /// # Example
     /// ```
-    /// use cardio_rs::frequence_domain::FrequenceMetrics;
+    /// use cardio_rs::frequency_domain::FrequencyMetrics;
     /// use cardio_rs::test_data::RR_INTERVALS;
     ///
     /// let rate = 4.0;
-    /// let frequency_metrics = FrequenceMetrics::compute_sampled(RR_INTERVALS, rate);
+    /// let frequency_metrics = FrequencyMetrics::compute_sampled(RR_INTERVALS, rate);
     /// ```
     ///
     /// # Notes
@@ -190,14 +190,14 @@ impl<
     /// - `rr_intervals`: A slice of raw RR intervals, representing the time differences between successive heartbeats.
     ///
     /// # Returns
-    /// A `FrequenceMetrics` struct containing the computed LF, HF, and VLF values, which represent the power in their respective frequency bands.
+    /// A `FrequencyMetrics` struct containing the computed LF, HF, and VLF values, which represent the power in their respective frequency bands.
     ///
     /// # Example
     /// ```
-    /// use cardio_rs::frequence_domain::FrequenceMetrics;
+    /// use cardio_rs::frequency_domain::FrequencyMetrics;
     /// use cardio_rs::test_data::RR_INTERVALS;
     ///
-    /// let frequency_metrics = FrequenceMetrics::compute(RR_INTERVALS);
+    /// let frequency_metrics = FrequencyMetrics::compute(RR_INTERVALS);
     /// ```
     ///
     /// # Notes
@@ -228,7 +228,7 @@ mod tests {
     use crate::test_data::RR_INTERVALS;
     use approx::{AbsDiffEq, RelativeEq, UlpsEq, assert_relative_eq};
 
-    impl<T: AbsDiffEq> AbsDiffEq for FrequenceMetrics<T>
+    impl<T: AbsDiffEq> AbsDiffEq for FrequencyMetrics<T>
     where
         T::Epsilon: Copy,
     {
@@ -245,7 +245,7 @@ mod tests {
         }
     }
 
-    impl<T: RelativeEq> RelativeEq for FrequenceMetrics<T>
+    impl<T: RelativeEq> RelativeEq for FrequencyMetrics<T>
     where
         T::Epsilon: Copy,
     {
@@ -260,7 +260,7 @@ mod tests {
         }
     }
 
-    impl<T: UlpsEq> UlpsEq for FrequenceMetrics<T>
+    impl<T: UlpsEq> UlpsEq for FrequencyMetrics<T>
     where
         T::Epsilon: Copy,
     {
@@ -277,12 +277,12 @@ mod tests {
 
     #[test]
     fn test_frequency_metrics() {
-        let freq_params = FrequenceMetrics::compute(RR_INTERVALS);
+        let freq_params = FrequencyMetrics::compute(RR_INTERVALS);
 
         // TODO: comparaison is done https://github.com/Aura-healthcare/hrv-analysis
         // seems to not be the same as neurokit2
         assert_relative_eq!(
-            FrequenceMetrics {
+            FrequencyMetrics {
                 lf: 3134.3763575489256,
                 hf: 300.3896422597976,
                 vlf: 430.1935931595116,
