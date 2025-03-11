@@ -9,7 +9,7 @@
 //! ## Key Components:
 //! - `RRIntervals`: The main struct representing a collection of RR intervals and optional outlier/ectopic detections.
 //! - `DetectOutliers`: A trait for detecting outliers and ectopics with customizable implementations.
-//! - `EctopicMethod`: An enum that defines different methods for detecting ectopic beats in RR intervals (currently supports `Karlsson`).
+//! - `EctopicMethod`: An enum that defines different methods for detecting ectopic beats in RR intervals.
 //!
 //! ## Features:
 //! - **Detecting Outliers**: Outliers in the RR intervals are detected by comparing each interval to a provided range (`lowest_rr`, `highest_rr`).
@@ -43,12 +43,20 @@ use std::{
 
 /// Enum representing different methods for detecting ectopic beats in RR intervals.
 ///
-/// This enum allows for different methods to be used for detecting ectopic beats
-/// based on the user's preference or requirement. Currently, only the `Karlsson`
-/// method is supported, but additional methods can be added as needed.
+/// This enum provides various algorithms for identifying and removing ectopic beats
+/// based on predefined statistical criteria.
 pub enum EctopicMethod {
-    /// Karlsson method for detecting ectopic beats in the RR intervals.
+    /// Karlsson method for detecting ectopic beats in RR intervals.
+    ///
+    /// An RR interval is considered ectopic if it differs by more than 20%
+    /// from the mean of the previous and next RR intervals.
     Karlsson,
+
+    /// Acar method for detecting ectopic beats in RR intervals.
+    ///
+    /// An RR interval is considered ectopic if it differs by more than 20%
+    /// from the mean of the last 9 RR intervals.
+    Acar,
 }
 
 /// Struct representing RR intervals and associated outlier and ectopic detection results.
@@ -141,6 +149,16 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug + num::Signed + 'static + num::
                     let mean = (self[i] + self[i + 2]) / T::from(2).unwrap();
                     if (mean - self[i + 1]).abs() >= T::from(0.2).unwrap() * mean {
                         Some(i + 1)
+                    } else {
+                        None
+                    }
+                })
+                .collect(),
+            EctopicMethod::Acar => (9..self.len())
+                .filter_map(|i| {
+                    let mean = (self[i - 9..i].iter().cloned().sum::<T>()) / T::from(9).unwrap();
+                    if (mean - self[i]).abs() >= T::from(0.2).unwrap() * mean {
+                        Some(i)
                     } else {
                         None
                     }
@@ -240,12 +258,26 @@ mod tests {
     }
 
     #[test]
-    fn test_remove_ectopics() {
+    fn test_remove_ectopics_karlsson() {
         let mut rr_intervals = RRIntervals::new(vec![800., 850., 900., 600., 800., 820., 840.]);
         rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
         assert_eq!(Some(vec![2, 3]), rr_intervals.ectopics);
         rr_intervals.remove_outliers_ectopics();
         assert_eq!(vec![800., 850., 800., 820., 840.], *rr_intervals);
+    }
+
+    #[test]
+    fn test_remove_ectopics_acar() {
+        let mut rr_intervals = RRIntervals::new(vec![
+            800., 850., 3000., 600., 800., 820., 240., 800., 850., 3000., 600., 800., 820., 240.,
+        ]);
+        rr_intervals.detect_ectopics(EctopicMethod::Acar);
+        assert_eq!(Some(vec![9, 10, 11, 13]), rr_intervals.ectopics);
+        rr_intervals.remove_outliers_ectopics();
+        assert_eq!(
+            vec![800., 850., 3000., 600., 800., 820., 240., 800., 850., 820.],
+            *rr_intervals
+        );
     }
 
     #[test]
