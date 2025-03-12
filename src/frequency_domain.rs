@@ -93,17 +93,9 @@ impl<
     /// - HF: 0.15 - 0.40 Hz
     /// - VLF: 0.003 - 0.04 Hz
     pub fn compute_sampled(sampled_rr_intervals: &[T], rate: T) -> Self {
-        // Trim the vector to allow for a segment size of 256 with 128 overlap
-        // This ensures "almost" consistent results with the HRV library using Scipy
-        let cut_length = sampled_rr_intervals.len() / 256 * 256;
         let mean = sampled_rr_intervals.iter().copied().sum::<T>()
             / T::from_usize(sampled_rr_intervals.len()).unwrap();
         let sampled_rr_intervals: Vec<T> = sampled_rr_intervals.iter().map(|&i| i - mean).collect();
-        let sampled_rr_intervals: Vec<T> = sampled_rr_intervals
-            .iter()
-            .take(cut_length)
-            .copied()
-            .collect();
         let n_seg = std::cmp::max(
             1,
             ((sampled_rr_intervals.len() / 256) * 2).saturating_sub(1),
@@ -290,7 +282,7 @@ mod tests {
                 vlf: 430.1935931595116,
             },
             freq_params,
-            epsilon = 600., // TODO get better welch
+            max_relative = 0.15, // TODO get better welch to get closer to hrv-analysis reference
         );
     }
 }

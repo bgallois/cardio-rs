@@ -115,7 +115,7 @@ impl Data {
             .collect::<Vec<f64>>();
 
         let ps = PeakFinder::new_with_x(&signal, &x)
-            .with_min_prominence(1.5)
+            .with_min_prominence(0.75)
             .with_min_distance(0.33)
             .find_peaks();
 
