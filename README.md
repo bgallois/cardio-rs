@@ -64,11 +64,27 @@
 
 ```rust
 use cardio_rs::{
+    standard_analysis,
+    HrvMetrics,
+};
+
+let path = "tests/ecg.csv";
+let signal = "ECG_Raw";
+let rate = 1000.;
+
+let hrv_metrics = standard_analysis!(path, signal, rate);
+println!("{:?}", hrv_metrics);
+```
+
+```rust
+use cardio_rs::{
     processing_utils::{RRIntervals, EctopicMethod, DetectOutliers},
     time_domain::TimeMetrics,
     geometric_domain::GeometricMetrics,
     frequency_domain::FrequencyMetrics,
     io_utils::{DataBuilder},
+    standard_analysis,
+    HrvMetrics,
 };
 
 let path = "tests/ecg.csv";
@@ -78,6 +94,12 @@ let data = DataBuilder::new(path.into(), signal.into())
     .with_time(time.into())
     .build()
     .unwrap();
+
+let hrv_metrics = standard_analysis!(data.clone());
+println!("{:?}", hrv_metrics);
+
+// Or manually for more control
+
 let mut rr_intervals = RRIntervals::new(data.get_rr());
 
 rr_intervals.detect_ectopics(EctopicMethod::Karlsson);

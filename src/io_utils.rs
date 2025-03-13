@@ -68,6 +68,7 @@ use std::path::PathBuf;
 /// representation of a dataset. It provides functionality to perform
 /// operations like collecting the data into a `DataFrame` or extracting
 /// RR intervals from physiological signals.
+#[derive(Clone)]
 pub struct Data {
     /// Raw data.
     data: LazyFrame,
