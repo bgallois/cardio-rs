@@ -189,16 +189,8 @@ impl<T> DerefMut for RRIntervals<T> {
     }
 }
 
-impl<
-    T: Float
-        + Sum<T>
-        + Copy
-        + core::fmt::Debug
-        + welch_sde::Signal
-        + num::Signed
-        + 'static
-        + num::FromPrimitive,
-> RRIntervals<T>
+impl<T: Float + Sum<T> + Copy + core::fmt::Debug + num::Signed + 'static + num::FromPrimitive>
+    RRIntervals<T>
 {
     /// Creates a new instance of `RRIntervals` from a vector of RR intervals.
     ///

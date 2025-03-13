@@ -21,10 +21,10 @@
 //! This implementation provides results that are within a few percent of the Python `hrv-analysis` package but may differ slightly from those obtained using `NeuroKit2` with a 4Hz resampling rate.
 #![cfg(feature = "std")]
 
+use super::welch::WelchBuilder;
 use core::iter::Sum;
 use interp::{InterpMode, interp_slice};
 use num::Float;
-use welch_sde::{Build, SpectralDensity};
 
 /// A struct representing frequency-domain heart rate variability (HRV) metrics.
 ///
@@ -49,9 +49,11 @@ impl<
         + Sum<T>
         + Copy
         + core::fmt::Debug
-        + welch_sde::Signal
         + num::Signed
         + 'static
+        + std::ops::AddAssign
+        + std::marker::Send
+        + std::marker::Sync
         + num::FromPrimitive,
 > FrequencyMetrics<T>
 {
@@ -96,20 +98,17 @@ impl<
         let mean = sampled_rr_intervals.iter().copied().sum::<T>()
             / T::from_usize(sampled_rr_intervals.len()).unwrap();
         let sampled_rr_intervals: Vec<T> = sampled_rr_intervals.iter().map(|&i| i - mean).collect();
-        let n_seg = std::cmp::max(
-            1,
-            ((sampled_rr_intervals.len() / 256) * 2).saturating_sub(1),
-        );
-        let builder = welch_sde::Builder::new(&sampled_rr_intervals)
-            .sampling_frequency(rate)
-            .overlap(0.5)
-            .n_segment(n_seg);
+        let welch = WelchBuilder::new(sampled_rr_intervals)
+            .with_fs(rate)
+            .with_dft_size(4096)
+            .with_overlap_size(128)
+            .with_segment_size(256)
+            .build();
 
-        let welch: SpectralDensity<T> = builder.build();
-        let psd = welch.periodogram();
+        let psd = welch.periodogram;
 
-        let lf: Vec<(T, T)> = psd
-            .frequency()
+        let lf: Vec<(T, T)> = welch
+            .frequencies
             .iter()
             .zip(psd.iter())
             .filter_map(|(&f, &psd_value)| {
@@ -121,8 +120,8 @@ impl<
             })
             .collect();
 
-        let hf: Vec<(T, T)> = psd
-            .frequency()
+        let hf: Vec<(T, T)> = welch
+            .frequencies
             .iter()
             .zip(psd.iter())
             .filter_map(|(&f, &psd_value)| {
@@ -134,8 +133,8 @@ impl<
             })
             .collect();
 
-        let vlf: Vec<(T, T)> = psd
-            .frequency()
+        let vlf: Vec<(T, T)> = welch
+            .frequencies
             .iter()
             .zip(psd.iter())
             .filter_map(|(&f, &psd_value)| {
@@ -270,11 +269,9 @@ mod tests {
     }
 
     #[test]
-    fn test_frequency_metrics() {
+    fn test_frequency_metrics_with_resampling() {
         let freq_params = FrequencyMetrics::compute(RR_INTERVALS, 4.);
 
-        // TODO: comparaison is done https://github.com/Aura-healthcare/hrv-analysis
-        // seems to not be the same as neurokit2
         assert_relative_eq!(
             FrequencyMetrics {
                 lf: 3134.3763575489256,
@@ -282,7 +279,22 @@ mod tests {
                 vlf: 430.1935931595116,
             },
             freq_params,
-            max_relative = 0.15, // TODO get better welch to get closer to hrv-analysis reference
+            max_relative = 0.15,
+        );
+    }
+
+    #[test]
+    fn test_frequency_metrics_no_resampling() {
+        let freq_params = FrequencyMetrics::compute_sampled(&RR_INTERVALS.repeat(2), 4.);
+
+        assert_relative_eq!(
+            FrequencyMetrics {
+                lf: 23.036923299930482,
+                hf: 3676.2170268774908,
+                vlf: 0.0735921788931728,
+            },
+            freq_params,
+            max_relative = 0.03,
         );
     }
 }

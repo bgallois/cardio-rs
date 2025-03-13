@@ -66,7 +66,8 @@ fn test_real_ecg() {
         max_relative = precision
     );
 
-    let precision = 0.2;
+    let precision = 0.15;
+
     assert_relative_eq!(
         frequency_metrics.hf,
         1459.8731219921774,

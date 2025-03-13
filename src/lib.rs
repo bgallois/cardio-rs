@@ -7,3 +7,4 @@ pub mod io_utils;
 pub mod processing_utils;
 pub mod test_data;
 pub mod time_domain;
+pub mod welch;
