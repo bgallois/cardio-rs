@@ -20,6 +20,50 @@ use num::{Complex, Float};
 use rustfft::{Fft, FftDirection, FftNum};
 use std::{cmp, f64::consts::PI};
 
+/// A trait representing a windowing function that can be applied to a signal.
+///
+/// Window functions are commonly used in signal processing to mitigate spectral leakage
+/// when performing Fourier transforms. A window function modifies a signal by applying
+/// a predefined weighting curve before analysis.
+pub trait Window<T> {
+    /// Applies the window function to the given signal.
+    ///
+    /// # Parameters
+    /// * `signal` - A vector representing the input signal.
+    ///
+    /// # Returns
+    /// A new iterator where each sample has been multiplied by the corresponding window weight.
+    ///
+    /// # Panics
+    /// Implementations may panic if `signal.len()` does not match the expected window size.
+    fn apply(&self, chunk: &[T]) -> impl Iterator<Item = T>;
+    /// Computes the power of the window function.
+    ///
+    /// The power is typically the sum of squared window coefficients, which can be used
+    /// for normalization purposes in signal processing.
+    ///
+    /// # Returns
+    /// The computed power of the window function.
+    fn power(&self) -> T;
+}
+
+impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum> Window<T> for Hann<T> {
+    fn apply(&self, chunk: &[T]) -> impl Iterator<Item = T> {
+        if chunk.len() != self.weights.len() {
+            panic!("Signal and Window should have the same size");
+        }
+        let chunk_mean = chunk.iter().copied().sum::<T>() / T::from(chunk.len()).unwrap();
+        chunk
+            .iter()
+            .zip(self.weights.iter())
+            .map(move |(&a, &b)| (a - chunk_mean) * b)
+    }
+
+    fn power(&self) -> T {
+        self.weights.iter().map(|&w| w * w).sum()
+    }
+}
+
 /// Represents a Hann window function.
 ///
 /// The Hann window is commonly used in spectral analysis and signal processing
@@ -68,6 +112,67 @@ impl HannBuilder {
     }
 }
 
+/// Represents different normalization methods for spectral analysis.
+///
+/// This enum is used to specify how the periodogram should be normalized when computing
+/// the power spectral density (PSD) or the power spectrum.
+#[derive(Debug, PartialEq, Clone, Copy)]
+pub enum Normalization<T> {
+    /// Normalization by sampling frequency, producing a power spectral density (PSD).
+    ///
+    /// When used, the resulting spectrum has units of `V²/Hz` if the input signal is in V
+    /// and the sampling frequency is in Hz. The total power of the signal is obtained
+    /// by integrating over all frequencies.
+    Density,
+
+    /// Normalization by the sum of squared window coefficients, producing a power spectrum.
+    ///
+    /// When used, the resulting spectrum has units of `V²` if the input signal is in volts.
+    /// This represents the total power distributed across frequency bins.
+    Spectrum,
+
+    /// Custom normalization factor.
+    ///
+    /// Allows the user to specify a custom normalization value, useful for advanced applications
+    /// where neither `Density` nor `Spectrum` provide the desired scaling.
+    Custom(T),
+}
+
+/// A trait for computing the periodogram and corresponding frequencies of a signal.
+///
+/// The periodogram estimates the power spectral density (PSD) of a signal.
+/// Implementations of this trait should provide methods to compute both the periodogram
+/// and its associated frequency values.
+pub trait Periodogram<T> {
+    /// Returns an iterator over the periodogram values.
+    ///
+    /// The periodogram represents the power spectral density (PSD) of a signal,
+    /// computed using a spectral estimation method (e.g., Welch's method).
+    ///
+    /// # Returns
+    /// An iterator that yields the power spectral density values as `T`.
+    fn periodogram(&self) -> impl Iterator<Item = T> + '_;
+
+    /// Returns an iterator over the frequency values corresponding to the periodogram.
+    ///
+    /// The frequencies are typically derived based on the sampling rate and windowing
+    /// used in the spectral estimation.
+    ///
+    /// # Returns
+    /// An iterator that yields the frequency values as `T`.
+    fn frequencies(&self) -> impl Iterator<Item = T> + '_;
+}
+
+impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum> Periodogram<T> for Welch<T> {
+    fn periodogram(&self) -> impl Iterator<Item = T> + '_ {
+        self.periodogram.iter().copied()
+    }
+
+    fn frequencies(&self) -> impl Iterator<Item = T> + '_ {
+        self.frequencies.iter().copied()
+    }
+}
+
 /// Represents the result of Welch's method for power spectral density estimation.
 ///
 /// Welch's method reduces noise in power spectral estimates by averaging
@@ -76,8 +181,8 @@ impl HannBuilder {
 /// # Type Parameters
 /// * `T` - A numeric type that supports floating-point operations.
 pub struct Welch<T> {
-    pub periodogram: Vec<T>,
-    pub frequencies: Vec<T>,
+    periodogram: Vec<T>,
+    frequencies: Vec<T>,
 }
 
 /// Builder for constructing a Welch power spectral density estimator.
@@ -88,6 +193,7 @@ pub struct Welch<T> {
 /// # Type Parameters
 /// * `T` - A floating-point type that supports FFT operations.
 pub struct WelchBuilder<T> {
+    normalization: Normalization<T>,
     segment_size: usize,
     dft_size: usize,
     overlap_size: usize,
@@ -107,6 +213,7 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
     /// A new `WelchBuilder` instance with default parameters.
     pub fn new(signal: Vec<T>) -> Self {
         WelchBuilder {
+            normalization: Normalization::Density,
             signal,
             segment_size: 256,
             dft_size: 4096,
@@ -139,6 +246,12 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
         self
     }
 
+    /// Sets the normalization.
+    pub fn with_normalization(mut self, norma: Normalization<T>) -> Self {
+        self.normalization = norma;
+        self
+    }
+
     /// Constructs the Welch power spectral density estimator.
     ///
     /// # Returns
@@ -149,14 +262,8 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
         let mut i = 0;
         let mut n_segments = 0;
         while i + self.segment_size < self.signal.len() {
-            let chunk: Vec<T> =
-                self.signal[i..cmp::min(i + self.segment_size, self.signal.len())].to_vec();
-            let chunk_mean = chunk.iter().copied().sum::<T>() / T::from(chunk.len()).unwrap();
-            let chunk = chunk
-                .iter()
-                .zip(window.weights.iter())
-                .map(|(&a, &b)| (a - chunk_mean) * b)
-                .collect::<Vec<T>>();
+            let chunk = &self.signal[i..cmp::min(i + self.segment_size, self.signal.len())];
+            let chunk = window.apply(chunk);
 
             let fft = rustfft::algorithm::Radix4::new(self.dft_size, FftDirection::Forward);
 
@@ -167,20 +274,20 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
                 };
                 self.dft_size
             ];
-            chunk.iter().enumerate().for_each(|(i, j)| {
-                buffer[i].re = *j;
+            chunk.enumerate().for_each(|(i, j)| {
+                buffer[i].re = j;
             });
             fft.process(&mut buffer);
 
             let pdg: Vec<T> = buffer
-                .iter()
+                .into_iter()
                 .take(self.dft_size / 2)
                 .map(|i| i.norm_sqr())
                 .collect();
             periodogram
                 .iter_mut()
-                .zip(pdg.iter())
-                .for_each(|(a, b)| *a += *b);
+                .zip(pdg.into_iter())
+                .for_each(|(a, b)| *a += b);
 
             i += self.segment_size - self.overlap_size;
             n_segments += 1;
@@ -188,9 +295,14 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
         let frequencies: Vec<T> = (0..self.dft_size / 2)
             .map(|i| T::from(i).unwrap() * self.fs / T::from(self.dft_size).unwrap())
             .collect();
-        let window_power: T = window.weights.iter().map(|&w| w * w).sum();
-        let norma = (window_power * T::from(n_segments).unwrap() * self.fs).recip();
-        let periodogram = periodogram.iter().map(|&p| p * norma).collect();
+        let norma = match self.normalization {
+            Normalization::Density => {
+                (window.power() * T::from(n_segments).unwrap() * self.fs).recip()
+            }
+            Normalization::Spectrum => (window.power() * T::from(n_segments).unwrap()).recip(),
+            Normalization::Custom(e) => e * T::from(n_segments).unwrap(),
+        };
+        let periodogram = periodogram.into_iter().map(|p| p * norma).collect();
 
         Welch {
             periodogram,

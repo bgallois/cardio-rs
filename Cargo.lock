@@ -184,7 +184,7 @@ dependencies = [
 
 [[package]]
 name = "cardio-rs"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "approx",
  "find_peaks",

@@ -120,7 +120,7 @@ impl Data {
             .with_min_distance(0.33)
             .find_peaks();
 
-        let mut ps: Vec<f64> = ps.iter().map(|i| x[i.middle_position()]).collect();
+        let mut ps: Vec<f64> = ps.into_iter().map(|i| x[i.middle_position()]).collect();
         ps.sort_by(|a, b| a.partial_cmp(b).unwrap());
         ps.windows(2).map(|i| (i[1] - i[0]) * 1000.0).collect()
     }

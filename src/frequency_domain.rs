@@ -21,7 +21,7 @@
 //! This implementation provides results that are within a few percent of the Python `hrv-analysis` package but may differ slightly from those obtained using `NeuroKit2` with a 4Hz resampling rate.
 #![cfg(feature = "std")]
 
-use super::welch::WelchBuilder;
+use super::welch::{Periodogram, WelchBuilder};
 use core::iter::Sum;
 use interp::{InterpMode, interp_slice};
 use num::Float;
@@ -57,12 +57,23 @@ impl<
         + num::FromPrimitive,
 > FrequencyMetrics<T>
 {
-    fn trapezoidal(x: &[T], y: &[T]) -> T {
-        let mut sum = T::from(0).unwrap();
-        for i in 0..(x.len() - 1) {
-            let dx = x[i + 1] - x[i];
-            sum += T::from(0.5).unwrap() * (y[i] + y[i + 1]) * dx;
+    fn trapezoidal(iter: impl Iterator<Item = (T, T)>) -> T
+//where
+    //T: Copy + num::Zero + AddAssign,
+    {
+        let mut sum = T::zero();
+        let mut prev_x = None;
+        let mut prev_y = None;
+
+        for (x, y) in iter {
+            if let Some((prev_x_value, prev_y_value)) = prev_x.zip(prev_y) {
+                let dx = x - prev_x_value;
+                sum += T::from(0.5).unwrap() * (prev_y_value + y) * dx;
+            }
+            prev_x = Some(x);
+            prev_y = Some(y);
         }
+
         sum
     }
 
@@ -105,67 +116,44 @@ impl<
             .with_segment_size(256)
             .build();
 
-        let psd = welch.periodogram;
-
-        let lf: Vec<(T, T)> = welch
-            .frequencies
-            .iter()
-            .zip(psd.iter())
-            .filter_map(|(&f, &psd_value)| {
+        let lf = welch
+            .frequencies()
+            .zip(welch.periodogram())
+            .filter_map(|(f, psd_value)| {
                 if f >= T::from(0.004).unwrap() && f < T::from(0.15).unwrap() {
                     Some((f, psd_value))
                 } else {
                     None
                 }
-            })
-            .collect();
+            });
 
-        let hf: Vec<(T, T)> = welch
-            .frequencies
-            .iter()
-            .zip(psd.iter())
-            .filter_map(|(&f, &psd_value)| {
+        let hf = welch
+            .frequencies()
+            .zip(welch.periodogram())
+            .filter_map(|(f, psd_value)| {
                 if f >= T::from(0.15).unwrap() && f < T::from(0.4).unwrap() {
                     Some((f, psd_value))
                 } else {
                     None
                 }
-            })
-            .collect();
+            });
 
-        let vlf: Vec<(T, T)> = welch
-            .frequencies
-            .iter()
-            .zip(psd.iter())
-            .filter_map(|(&f, &psd_value)| {
+        let vlf = welch
+            .frequencies()
+            .zip(welch.periodogram())
+            .filter_map(|(f, psd_value)| {
                 if f >= T::from(0.003).unwrap() && f < T::from(0.04).unwrap() {
                     Some((f, psd_value))
                 } else {
                     None
                 }
-            })
-            .collect();
+            });
 
-        let lf = Self::trapezoidal(
-            &lf.iter().map(|&(f, _)| f).collect::<Vec<T>>(),
-            &lf.iter()
-                .map(|&(_, psd_value)| psd_value)
-                .collect::<Vec<T>>(),
-        );
+        let lf = Self::trapezoidal(lf);
 
-        let hf = Self::trapezoidal(
-            &hf.iter().map(|&(f, _)| f).collect::<Vec<T>>(),
-            &hf.iter()
-                .map(|&(_, psd_value)| psd_value)
-                .collect::<Vec<T>>(),
-        );
+        let hf = Self::trapezoidal(hf);
 
-        let vlf = Self::trapezoidal(
-            &vlf.iter().map(|&(f, _)| f).collect::<Vec<T>>(),
-            &vlf.iter()
-                .map(|&(_, psd_value)| psd_value)
-                .collect::<Vec<T>>(),
-        );
+        let vlf = Self::trapezoidal(vlf);
 
         Self {
             lf: lf * T::from(2).unwrap(),
