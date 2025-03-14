@@ -45,6 +45,11 @@ pub trait Window<T> {
     /// # Returns
     /// The computed power of the window function.
     fn power(&self) -> T;
+    /// Computes the sum of the window function.
+    ///
+    /// # Returns
+    /// The computed sum of the window function.
+    fn sum(&self) -> T;
 }
 
 impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum> Window<T> for Hann<T> {
@@ -61,6 +66,10 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum> Window<T> for
 
     fn power(&self) -> T {
         self.weights.iter().map(|&w| w * w).sum()
+    }
+
+    fn sum(&self) -> T {
+        self.weights.iter().copied().sum()
     }
 }
 
@@ -299,7 +308,9 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
             Normalization::Density => {
                 (window.power() * T::from(n_segments).unwrap() * self.fs).recip()
             }
-            Normalization::Spectrum => (window.power() * T::from(n_segments).unwrap()).recip(),
+            Normalization::Spectrum => {
+                (window.sum() * window.sum() * T::from(n_segments).unwrap()).recip()
+            }
             Normalization::Custom(e) => e * T::from(n_segments).unwrap(),
         };
         let periodogram = periodogram.into_iter().map(|p| p * norma).collect();
@@ -308,5 +319,118 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
             periodogram,
             frequencies,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use approx::assert_relative_eq;
+    use rand::rng;
+    use rand_distr::{Distribution, Normal};
+
+    #[test]
+    fn test_normal_density() {
+        let normal = Normal::new(0., 1.).unwrap();
+        let mut rng = rng();
+        let samples: Vec<f64> = (0..100_000).map(|_| normal.sample(&mut rng)).collect();
+
+        let welch = WelchBuilder::new(samples)
+            .with_fs(4.)
+            .with_dft_size(4096)
+            .with_overlap_size(128)
+            .with_segment_size(256)
+            .with_normalization(Normalization::Density)
+            .build();
+        assert_relative_eq!(
+            welch.periodogram().sum::<f64>()
+                / welch.periodogram().collect::<Vec<f64>>().len() as f64,
+            0.249,
+            epsilon = 1e-2
+        );
+    }
+
+    #[test]
+    fn test_normal_spectrum() {
+        let normal = Normal::new(0., 1.).unwrap();
+        let mut rng = rng();
+        let samples: Vec<f64> = (0..100_000).map(|_| normal.sample(&mut rng)).collect();
+
+        let welch = WelchBuilder::new(samples)
+            .with_fs(4.)
+            .with_dft_size(4096)
+            .with_overlap_size(128)
+            .with_segment_size(256)
+            .with_normalization(Normalization::Spectrum)
+            .build();
+        assert_relative_eq!(
+            welch.periodogram().sum::<f64>()
+                / welch.periodogram().collect::<Vec<f64>>().len() as f64,
+            0.00585,
+            epsilon = 1e-4
+        );
+    }
+
+    #[test]
+    fn test_frequence() {
+        let normal = Normal::new(0., 1.).unwrap();
+        let mut rng = rng();
+        let samples: Vec<f64> = (0..100_000).map(|_| normal.sample(&mut rng)).collect();
+
+        let welch = WelchBuilder::new(samples)
+            .with_fs(400.)
+            .with_dft_size(4096)
+            .with_overlap_size(128)
+            .with_segment_size(256)
+            .with_normalization(Normalization::Density)
+            .build();
+        assert_relative_eq!(
+            welch.periodogram().sum::<f64>()
+                / welch.periodogram().collect::<Vec<f64>>().len() as f64,
+            0.0024846134053086084,
+            epsilon = 1e-4
+        );
+    }
+
+    #[test]
+    fn test_dtf() {
+        let normal = Normal::new(0., 1.).unwrap();
+        let mut rng = rng();
+        let samples: Vec<f64> = (0..100_000).map(|_| normal.sample(&mut rng)).collect();
+
+        let welch = WelchBuilder::new(samples)
+            .with_fs(400.)
+            .with_dft_size(512)
+            .with_overlap_size(128)
+            .with_segment_size(256)
+            .with_normalization(Normalization::Density)
+            .build();
+        assert_relative_eq!(
+            welch.periodogram().sum::<f64>()
+                / welch.periodogram().collect::<Vec<f64>>().len() as f64,
+            0.0025083335651038905,
+            epsilon = 1e-4
+        );
+    }
+
+    #[test]
+    fn test_short() {
+        let normal = Normal::new(0., 1.).unwrap();
+        let mut rng = rng();
+        let samples: Vec<f64> = (0..100_000).map(|_| normal.sample(&mut rng)).collect();
+
+        let welch = WelchBuilder::new(samples)
+            .with_fs(4.)
+            .with_dft_size(128)
+            .with_overlap_size(1)
+            .with_segment_size(8)
+            .with_normalization(Normalization::Density)
+            .build();
+        assert_relative_eq!(
+            welch.periodogram().sum::<f64>()
+                / welch.periodogram().collect::<Vec<f64>>().len() as f64,
+            0.21985243050737127,
+            epsilon = 1e-2
+        );
     }
 }
