@@ -23,7 +23,6 @@
 
 use super::welch::{Periodogram, WelchBuilder};
 use core::iter::Sum;
-use interp::{InterpMode, interp_slice};
 use num::Float;
 
 /// A struct representing frequency-domain heart rate variability (HRV) metrics.
@@ -57,10 +56,7 @@ impl<
         + num::FromPrimitive,
 > FrequencyMetrics<T>
 {
-    fn trapezoidal(iter: impl Iterator<Item = (T, T)>) -> T
-//where
-    //T: Copy + num::Zero + AddAssign,
-    {
+    fn trapezoidal(iter: impl Iterator<Item = (T, T)>) -> T {
         let mut sum = T::zero();
         let mut prev_x = None;
         let mut prev_y = None;
@@ -75,6 +71,19 @@ impl<
         }
 
         sum
+    }
+
+    fn interpolate(x: &[T], y: &[T], xp: impl Iterator<Item = T>) -> Vec<T> {
+        let m: Vec<T> = x
+            .windows(2)
+            .zip(y.windows(2))
+            .map(|(i, j)| (j[1] - j[0]) / (i[1] - i[0]))
+            .collect();
+        xp.map(|i| {
+            let xi = x.partition_point(|&p| p < i).saturating_sub(1);
+            y[xi] + m[xi] * (i - x[xi])
+        })
+        .collect()
     }
 
     /// Computes frequency-domain metrics (LF, HF, VLF) from sampled RR intervals.
@@ -194,11 +203,9 @@ impl<
             .map(|i| (i - rr_intervals[0]) / T::from(1_000).unwrap())
             .collect::<Vec<T>>();
         let step = *x.last().unwrap() * rate;
-        let xp = (0..step.to_f64().unwrap() as u64)
-            .map(|i| T::from(i).unwrap() / rate)
-            .collect::<Vec<T>>();
+        let xp = (0..step.to_f64().unwrap() as u64).map(|i| T::from(i).unwrap() / rate);
 
-        let sampled_rr_intervals = interp_slice(&x, rr_intervals, &xp, &InterpMode::Extrapolate);
+        let sampled_rr_intervals = Self::interpolate(&x, rr_intervals, xp);
         Self::compute_sampled(&sampled_rr_intervals, rate)
     }
 }

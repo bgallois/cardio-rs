@@ -26,14 +26,12 @@ std = [
   "rand_distr/std",
   "polars-lazy",
   "polars",
-  "interp",
   "find_peaks",
   "rustfft",
 ]
 
 [dependencies]
 find_peaks = { version = "0.1.5", optional = true, default-features = false }
-interp = { version = "2.0.2", optional = true, default-features = false }
 libm = { version = "0.2.11", default-features = false }
 num = { version = "0.4.3", default-features = false, features = ["libm"] }
 polars = { version = "0.46.0", features = ["polars-io"], optional = true, default-features = false }
