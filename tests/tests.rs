@@ -1,3 +1,4 @@
+#![cfg(feature = "std")]
 use approx::assert_relative_eq;
 use cardio_rs::{
     frequency_domain::FrequencyMetrics,

@@ -5,9 +5,7 @@
 
 📊 **Compute HRV time-domain & frequency-domain & geometric-domain metrics** from RR intervals with ease!  
 💓 **Preprocess ECG & PPG raw data** for accurate HRV analysis!  
-📟 **Supports embedded systems** with `no_std` (work in progress 🚧)!  
-
-> **Note:** Not all functionalities are `no_std` yet, but I’m working on it! 🛠️  
+📟 **Supports embedded systems** with `no_std`!  
 
 ---
 
@@ -18,7 +16,7 @@
 ✅ **Geometric-domain HRV metrics**: Triangular Index & TINN!  
 ✅ **ECG & PPG preprocessing**: Filtering, denoising, peak detection!  
 ✅ **Raw & interpolated RR intervals** supported!  
-✅ **🚀 `no_std` compatibility** (in progress)!  
+✅ **🚀 `no_std` compatibility**!  
 
 ---
 

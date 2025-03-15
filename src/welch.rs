@@ -14,11 +14,17 @@
 //!
 //! Future improvements should focus on extensibility, performance optimizations,
 //! and additional options to match SciPy's functionality.
-#![cfg(feature = "std")]
 
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+#[cfg(not(feature = "std"))]
+use alloc::vec;
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
+use core::{cmp, f64::consts::PI};
 use num::{Complex, Float};
-use rustfft::{Fft, FftDirection, FftNum};
-use std::{cmp, f64::consts::PI};
+#[cfg(feature = "std")]
+use rustfft::{Fft, FftDirection};
 
 /// A trait representing a windowing function that can be applied to a signal.
 ///
@@ -52,7 +58,7 @@ pub trait Window<T> {
     fn sum(&self) -> T;
 }
 
-impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum> Window<T> for Hann<T> {
+impl<T: Float + Copy + core::fmt::Debug + core::iter::Sum> Window<T> for Hann<T> {
     fn apply(&self, chunk: &[T]) -> impl Iterator<Item = T> {
         if chunk.len() != self.weights.len() {
             panic!("Signal and Window should have the same size");
@@ -109,7 +115,7 @@ impl HannBuilder {
     /// A `Hann<T>` instance containing the computed window weights.
     pub fn build<T>(&self) -> Hann<T>
     where
-        T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum,
+        T: Float + Copy + core::fmt::Debug + core::iter::Sum,
     {
         let weights = (0..self.n)
             .map(|i| {
@@ -172,7 +178,7 @@ pub trait Periodogram<T> {
     fn frequencies(&self) -> impl Iterator<Item = T> + '_;
 }
 
-impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum> Periodogram<T> for Welch<T> {
+impl<T: Float + Copy + core::fmt::Debug + core::iter::Sum> Periodogram<T> for Welch<T> {
     fn periodogram(&self) -> impl Iterator<Item = T> + '_ {
         self.periodogram.iter().copied()
     }
@@ -210,8 +216,18 @@ pub struct WelchBuilder<T> {
     signal: Vec<T>,
 }
 
-impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::AddAssign>
-    WelchBuilder<T>
+impl<
+    T: Float
+        + Copy
+        + core::fmt::Debug
+        + core::marker::Sync
+        + core::marker::Send
+        + core::iter::Sum
+        + core::ops::AddAssign
+        + num::Signed
+        + num::FromPrimitive
+        + 'static,
+> WelchBuilder<T>
 {
     /// Creates a new WelchBuilder with a given input signal.
     ///
@@ -238,6 +254,7 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
     }
 
     /// Sets the FFT size.
+    #[cfg(feature = "std")]
     pub fn with_dft_size(mut self, n: usize) -> Self {
         self.dft_size = n;
         self
@@ -274,8 +291,6 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
             let chunk = &self.signal[i..cmp::min(i + self.segment_size, self.signal.len())];
             let chunk = window.apply(chunk);
 
-            let fft = rustfft::algorithm::Radix4::new(self.dft_size, FftDirection::Forward);
-
             let mut buffer = vec![
                 Complex {
                     re: T::from(0).unwrap(),
@@ -286,7 +301,17 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
             chunk.enumerate().for_each(|(i, j)| {
                 buffer[i].re = j;
             });
-            fft.process(&mut buffer);
+
+            #[cfg(feature = "std")]
+            {
+                let fft = rustfft::algorithm::Radix4::new(self.dft_size, FftDirection::Forward);
+                fft.process(&mut buffer);
+            }
+
+            #[cfg(not(feature = "std"))]
+            {
+                naive_fft(&mut buffer);
+            }
 
             let pdg: Vec<T> = buffer
                 .into_iter()
@@ -322,6 +347,29 @@ impl<T: Float + Copy + core::fmt::Debug + FftNum + std::iter::Sum + std::ops::Ad
     }
 }
 
+#[cfg(not(feature = "std"))]
+fn naive_fft<T: Float + Copy + core::fmt::Debug + core::iter::Sum>(input: &mut [Complex<T>]) {
+    let n = input.len();
+    if n <= 1 {
+        return;
+    }
+
+    let mut even: Vec<Complex<T>> = input.iter().copied().step_by(2).collect();
+    let mut odd: Vec<Complex<T>> = input.iter().copied().skip(1).step_by(2).collect();
+
+    naive_fft(&mut even);
+    naive_fft(&mut odd);
+
+    for k in 0..n / 2 {
+        let twiddle = Complex::from_polar(
+            T::one(),
+            -T::from(2.0 * PI).unwrap() * T::from(k).unwrap() / T::from(n).unwrap(),
+        ) * odd[k];
+        input[k] = even[k] + twiddle;
+        input[k + n / 2] = even[k] - twiddle;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -337,7 +385,6 @@ mod tests {
 
         let welch = WelchBuilder::new(samples)
             .with_fs(4.)
-            .with_dft_size(4096)
             .with_overlap_size(128)
             .with_segment_size(256)
             .with_normalization(Normalization::Density)
@@ -358,7 +405,6 @@ mod tests {
 
         let welch = WelchBuilder::new(samples)
             .with_fs(4.)
-            .with_dft_size(4096)
             .with_overlap_size(128)
             .with_segment_size(256)
             .with_normalization(Normalization::Spectrum)
@@ -379,7 +425,6 @@ mod tests {
 
         let welch = WelchBuilder::new(samples)
             .with_fs(400.)
-            .with_dft_size(4096)
             .with_overlap_size(128)
             .with_segment_size(256)
             .with_normalization(Normalization::Density)
@@ -392,6 +437,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn test_dtf() {
         let normal = Normal::new(0., 1.).unwrap();
@@ -413,6 +459,7 @@ mod tests {
         );
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn test_short() {
         let normal = Normal::new(0., 1.).unwrap();

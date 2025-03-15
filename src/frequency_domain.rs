@@ -19,9 +19,12 @@
 //!
 //! **Note:** The computed values heavily depend on the specific computational techniques used.
 //! This implementation provides results that are within a few percent of the Python `hrv-analysis` package but may differ slightly from those obtained using `NeuroKit2` with a 4Hz resampling rate.
-#![cfg(feature = "std")]
 
+#[cfg(not(feature = "std"))]
+extern crate alloc;
 use super::welch::{Periodogram, WelchBuilder};
+#[cfg(not(feature = "std"))]
+use alloc::vec::Vec;
 use core::iter::Sum;
 use num::Float;
 
@@ -50,9 +53,9 @@ impl<
         + core::fmt::Debug
         + num::Signed
         + 'static
-        + std::ops::AddAssign
-        + std::marker::Send
-        + std::marker::Sync
+        + core::ops::AddAssign
+        + core::marker::Send
+        + core::marker::Sync
         + num::FromPrimitive,
 > FrequencyMetrics<T>
 {
@@ -120,7 +123,6 @@ impl<
         let sampled_rr_intervals: Vec<T> = sampled_rr_intervals.iter().map(|&i| i - mean).collect();
         let welch = WelchBuilder::new(sampled_rr_intervals)
             .with_fs(rate)
-            .with_dft_size(4096)
             .with_overlap_size(128)
             .with_segment_size(256)
             .build();
