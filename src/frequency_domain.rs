@@ -9,6 +9,15 @@
 //!
 //! The HRV frequency-domain metrics provide insight into the balance between the sympathetic and parasympathetic branches of the autonomic nervous system. LF and HF are often used as markers of parasympathetic and sympathetic activity, respectively. VLF is associated with long-term variability and regulatory processes.
 //!
+//! # Example Usage
+//! ```
+//! use cardio_rs::frequency_domain::FrequencyMetrics;
+//! use cardio_rs::test_data::RR_INTERVALS;
+//!
+//! let rate = 4.0;
+//! let frequency_metrics = FrequencyMetrics::compute_sampled(RR_INTERVALS, rate);
+//! ```
+//!
 //! # Notes
 //!
 //! - LF: Typically ranges from 0.04 Hz to 0.15 Hz and reflects the balance between the sympathetic and parasympathetic nervous systems.

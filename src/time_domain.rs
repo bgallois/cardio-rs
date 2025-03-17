@@ -15,12 +15,7 @@
 //! The `TimeMetrics` struct allows easy access to these metrics after calculating them from a set of RR intervals.
 //! This is useful for cardiovascular health monitoring, stress assessment, and various other applications in physiology and healthcare analytics.
 //!
-//! # `no_std` Compatibility
-//!
-//! This module is designed to work in both standard (`std`) and `no_std` environments. It does not rely on the Rust standard library,
-//! making it suitable for use in embedded systems or other environments where `std` is unavailable.
-//!
-//! # Example
+//! # Example Usage
 //! ```
 //! use cardio_rs::time_domain::TimeMetrics;
 //!

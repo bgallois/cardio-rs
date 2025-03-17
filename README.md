@@ -3,7 +3,7 @@
 
 [![Docs.rs](https://docs.rs/cardio-rs/badge.svg)](https://docs.rs/cardio-rs)  [![CI](https://github.com/bgallois/cardio-rs/actions/workflows/test.yml/badge.svg)](https://github.com/bgallois/cardio-rs/actions/)[![Crates.io](https://img.shields.io/crates/v/cardio-rs.svg)](https://crates.io/crates/cardio-rs)
 
-📊 **Compute HRV time-domain & frequency-domain & geometric-domain metrics** from RR intervals with ease!  
+📊 **Compute HRV time-domain & frequency-domain & geometric metrics** from RR intervals with ease!  
 💓 **Preprocess ECG & PPG raw data** for accurate HRV analysis!  
 📟 **Supports embedded systems** with `no_std`!  
 
@@ -32,7 +32,7 @@
 
 ---
 
-## 📐 Geometric-domain HRV Metrics  
+## 📐 Geometric HRV Metrics  
 
 - 📊 **Triangular Index** – Measures RR interval distribution.  
 - 📊 **TINN (Triangular Interpolation of NN Interval Histogram)** – Estimates RR variability.  
