@@ -8,6 +8,7 @@ pub mod processing_utils;
 pub mod test_data;
 pub mod time_domain;
 pub mod welch;
+pub mod windows_analysis;
 
 /// A struct that contains the Heart Rate Variability (HRV) metrics,
 /// divided into time-domain, frequency-domain, and geometric-domain metrics.
@@ -78,7 +79,7 @@ macro_rules! standard_analysis {
         rr_intervals.remove_outliers_ectopics();
 
         let time = TimeMetrics::compute(rr_intervals.as_slice());
-        let frequency = FrequencyMetrics::compute(rr_intervals.as_slice(), 10.);
+        let frequency = FrequencyMetrics::compute(rr_intervals.as_slice(), 4.);
         let geometric = GeometricMetrics::compute(rr_intervals.as_slice());
 
         HrvMetrics {

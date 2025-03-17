@@ -17,6 +17,7 @@
 ✅ **ECG & PPG preprocessing**: Filtering, denoising, peak detection!  
 ✅ **Raw & interpolated RR intervals** supported!  
 ✅ **🚀 `no_std` compatibility**!  
+✅ **Window Analysis**: Split data into windows of a defined size for segment-based HRV analysis.  
 
 ---
 
@@ -53,6 +54,32 @@
 
 📡 **ECG Processing** – R-wave peak detection, filtering, and RR extraction!  
 💡 **PPG Processing** – Pulse detection & signal cleaning for HRV computation!  
+
+---
+
+## 🪟 Window Analysis  
+
+Cardio-rs supports **window analysis**, where your data can be split into windows of a defined size. This feature is ideal for segment-based HRV analysis, where the data is divided into distinct time periods (windows).  
+
+### Example:  
+
+```rust
+use cardio_rs::{
+    windows_analysis::WindowsAnalysisBuilder,
+};
+
+let data = vec![800., 810., 790., 765., 780., 800., 810., 795., 770., 785.];
+
+// Create the window analysis builder
+let analysis = WindowsAnalysisBuilder::new(data)
+    .with_window_size(3_000.)
+    .build();
+
+// Get the HRV metrics for each window
+println!("{:?}", analysis.metrics);
+```
+
+This allows you to perform HRV analysis on distinct segments of data, making it ideal for scenarios where you want to analyze specific time periods independently.
 
 ---
 
