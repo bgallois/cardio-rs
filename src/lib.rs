@@ -16,7 +16,6 @@ pub struct HrvMetrics<T> {
     /// Time-domain HRV metrics (`TimeMetrics<T>`).
     pub time: crate::time_domain::TimeMetrics<T>,
     /// Frequency-domain HRV metrics (`FrequencyMetrics<T>`).
-    #[cfg(feature = "std")]
     pub frequency: crate::frequency_domain::FrequencyMetrics<T>,
     /// Geometric-domain HRV metrics (`GeometricMetrics<T>`).
     pub geometric: crate::geometric_domain::GeometricMetrics<T>,
@@ -36,23 +35,16 @@ pub struct HrvMetrics<T> {
 /// ```rust
 /// use cardio_rs::standard_analysis;
 /// use cardio_rs::HrvMetrics;
-/// use cardio_rs::io_utils::DataBuilder;
 ///
-/// let path = "tests/ecg.csv";
-/// let signal = "ECG_Raw";
-/// let time = "Time";
-/// let data = DataBuilder::new(path.into(), signal.into())
-///    .with_time(time.into())
-///    .build()
-///    .unwrap();
-///
-/// let hrv_metrics = standard_analysis!(data);
+/// let rr_intervals = vec![800., 810., 780., 850., 900.];
+/// let hrv_metrics = standard_analysis!(rr_intervals);
 /// ```
-/// Where `data` should implement methods such as `get_rr()` for extracting RR intervals.
 ///
 /// - **Form 2**: Takes a file path, signal, and sample rate to build a `Data` object and then runs the analysis on that data.
 ///
 /// ```rust
+/// #[cfg(feature = "std")]
+/// {
 /// use cardio_rs::standard_analysis;
 /// use cardio_rs::HrvMetrics;
 ///
@@ -60,6 +52,7 @@ pub struct HrvMetrics<T> {
 /// let signal = "ECG_Raw";
 /// let rate = 1000.;
 /// let hrv_metrics = cardio_rs::standard_analysis!(path, signal, rate);
+/// }
 /// ```
 /// Where `path` is the file path to the data, `signal` is the name of the signal, and `rate`
 /// is the sample rate of the signal.
@@ -76,33 +69,33 @@ macro_rules! standard_analysis {
         use cardio_rs::{
             frequency_domain::FrequencyMetrics,
             geometric_domain::GeometricMetrics,
-            io_utils::{Data, DataBuilder},
             processing_utils::{DetectOutliers, EctopicMethod, RRIntervals},
             time_domain::TimeMetrics,
         };
-        let mut rr_intervals = RRIntervals::new($x.get_rr());
+        let mut rr_intervals = RRIntervals::new($x);
         rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
         rr_intervals.detect_outliers(&300., &2_000.);
         rr_intervals.remove_outliers_ectopics();
 
         let time = TimeMetrics::compute(rr_intervals.as_slice());
-        #[cfg(feature = "std")]
         let frequency = FrequencyMetrics::compute(rr_intervals.as_slice(), 10.);
         let geometric = GeometricMetrics::compute(rr_intervals.as_slice());
 
         HrvMetrics {
             time,
-            #[cfg(feature = "std")]
             frequency,
             geometric,
         }
     }};
     ( $path:expr, $signal:expr, $rate:expr ) => {{
-        use cardio_rs::io_utils::DataBuilder;
-        let data = DataBuilder::new($path.into(), $signal.into())
-            .with_rate($rate)
-            .build()
-            .unwrap();
-        standard_analysis!(data)
+        #[cfg(feature = "std")]
+        {
+            use cardio_rs::io_utils::{Data, DataBuilder};
+            let data = DataBuilder::new($path.into(), $signal.into())
+                .with_rate($rate)
+                .build()
+                .unwrap();
+            standard_analysis!(data.get_rr())
+        }
     }};
 }

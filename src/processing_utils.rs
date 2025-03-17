@@ -33,13 +33,16 @@
 //! - `DetectOutliers<T>`: A trait for detecting outliers and ectopics. Custom implementations can be provided by the user.
 //! - `EctopicMethod`: An enum for specifying different methods to detect ectopic beats (currently only `Karlsson` is supported).
 //!
-#![cfg(feature = "std")]
 
-use num::Float;
-use std::{
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+#[cfg(not(feature = "std"))]
+use alloc::{vec, vec::Vec};
+use core::{
     iter::Sum,
     ops::{Deref, DerefMut},
 };
+use num::Float;
 
 /// Enum representing different methods for detecting ectopic beats in RR intervals.
 ///

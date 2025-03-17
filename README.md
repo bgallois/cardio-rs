@@ -75,6 +75,7 @@ println!("{:?}", hrv_metrics);
 ```
 
 ```rust
+#[cfg(feature = "std")] {
 use cardio_rs::{
     processing_utils::{RRIntervals, EctopicMethod, DetectOutliers},
     time_domain::TimeMetrics,
@@ -93,7 +94,7 @@ let data = DataBuilder::new(path.into(), signal.into())
     .build()
     .unwrap();
 
-let hrv_metrics = standard_analysis!(data.clone());
+let hrv_metrics = standard_analysis!(data.clone().get_rr());
 println!("{:?}", hrv_metrics);
 
 // Or manually for more control
@@ -112,6 +113,7 @@ println!("{:?}", frequency_metrics);
 
 let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());
 println!("{:?}", geo_metrics);
+}
 ```
 
 🔥 **Start analyzing HRV today with cardio-rs!** 🚀💓
