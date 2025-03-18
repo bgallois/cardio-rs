@@ -36,7 +36,7 @@ use num::Float;
 ///
 /// The `TimeMetrics` struct holds key HRV parameters computed from RR intervals.
 /// These metrics are essential for assessing the short-term and long-term variability of heart rate, which can provide insights into the autonomic nervous system's regulation of the heart.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct TimeMetrics<T> {
     /// Root Mean Square of Successive Differences (RMSSD).
     /// A measure of short-term HRV derived from the differences between successive RR intervals.

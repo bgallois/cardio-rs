@@ -36,7 +36,7 @@ use core::iter::Sum;
 use num::Float;
 
 /// A struct representing two geometrical Heart Rate Variability (HRV) metrics.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct GeometricMetrics<T> {
     /// The **Triangular Index (TI)**, representing the total number of RR intervals
     /// divided by the maximum frequency in the histogram of NN-intervals.
@@ -47,9 +47,8 @@ pub struct GeometricMetrics<T> {
     pub tinn: T,
 }
 
-impl<T: Float + Sum<T> + Copy + core::fmt::Debug + core::ops::AddAssign> GeometricMetrics<T>
-where
-    f64: From<T>,
+impl<T: Float + Sum<T> + Copy + core::fmt::Debug + core::ops::AddAssign + Into<f64>>
+    GeometricMetrics<T>
 {
     /// Computes the **Triangular Index (TI)** and **TINN (Triangular Interpolation of NN-interval Histogram)**
     /// for a given sequence of RR intervals.
@@ -77,11 +76,11 @@ where
         let min = T::from(300).unwrap();
         let max = T::from(2_000).unwrap();
         let bin_width = T::from(8).unwrap();
-        let num_bins = f64::from(((max - min) / bin_width).ceil()) as usize;
+        let num_bins = Into::<f64>::into(((max - min) / bin_width).ceil()) as usize;
         let mut hist = vec![T::from(0).unwrap(); num_bins];
 
         rr_intervals.iter().for_each(|&i| {
-            let index = f64::from(((i - min) / bin_width).floor()) as usize;
+            let index = Into::<f64>::into(((i - min) / bin_width).floor()) as usize;
             hist[index] += T::one();
         });
 

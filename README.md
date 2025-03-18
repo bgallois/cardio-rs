@@ -18,6 +18,7 @@
 ✅ **Raw & interpolated RR intervals** supported!  
 ✅ **🚀 `no_std` compatibility**!  
 ✅ **Window Analysis**: Split data into windows of a defined size for segment-based HRV analysis.  
+✅ **Live Analysis**: Perform real-time HRV analysis with customizable pipelines for processing RR intervals!  
 
 ---
 
@@ -80,6 +81,33 @@ println!("{:?}", analysis.metrics);
 ```
 
 This allows you to perform HRV analysis on distinct segments of data, making it ideal for scenarios where you want to analyze specific time periods independently.
+
+---
+
+## 🔄 Live Analysis  
+
+The **live analysis** module enables real-time HRV analysis, processing incoming RR intervals and calculating HRV metrics dynamically. This allows you to process data in real-time as it is received.
+
+You can define a custom analysis pipeline for processing the data, enabling flexible and modular HRV calculations. A default pipeline is provided for standard HRV calculations.
+
+### Example:  
+
+```rust
+use cardio_rs::{
+    live_analysis::TimeQueue,
+    HrvMetrics,
+};
+use cardio_rs::test_data::RR_INTERVALS;
+
+let mut queue = TimeQueue::new(60_000);
+let rr_intervals = RR_INTERVALS.to_vec();
+for interval in rr_intervals {
+    queue.push(interval);
+}
+
+let hrv = queue.get_hrv();
+println!("Calculated HRV: {:?}", hrv);
+```
 
 ---
 

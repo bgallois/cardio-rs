@@ -4,6 +4,7 @@
 pub mod frequency_domain;
 pub mod geometric_domain;
 pub mod io_utils;
+pub mod live_analysis;
 pub mod processing_utils;
 pub mod test_data;
 pub mod time_domain;
@@ -12,7 +13,7 @@ pub mod windows_analysis;
 
 /// A struct that contains the Heart Rate Variability (HRV) metrics,
 /// divided into time-domain, frequency-domain, and geometric-domain metrics.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct HrvMetrics<T> {
     /// Time-domain HRV metrics (`TimeMetrics<T>`).
     pub time: crate::time_domain::TimeMetrics<T>,

@@ -133,10 +133,9 @@ impl<
         + core::ops::AddAssign
         + core::marker::Send
         + core::marker::Sync
+        + Into<f64>
         + num::FromPrimitive,
 > AnalysisPipeline<T> for DefaultPipeline
-where
-    f64: From<T>,
 {
     fn process(&self, data: Vec<T>) -> super::HrvMetrics<T> {
         let mut rr_intervals = RRIntervals::new(data);
@@ -307,7 +306,7 @@ mod tests {
         let mut data = RR_INTERVALS.to_vec();
         data.extend_from_within(..);
         let hrv = WindowsAnalysisBuilder::new(data.clone())
-            .with_window_size(59_7000. / 2.)
+            .with_window_size(597_000. / 2.)
             .build();
         assert_eq!(hrv.metrics[0], hrv.metrics[1]);
     }

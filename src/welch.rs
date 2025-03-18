@@ -113,10 +113,7 @@ impl HannBuilder {
     ///
     /// # Returns
     /// A `Hann<T>` instance containing the computed window weights.
-    pub fn build<T>(&self) -> Hann<T>
-    where
-        T: Float + Copy + core::fmt::Debug + core::iter::Sum,
-    {
+    pub fn build<T: Float + Copy + core::fmt::Debug + core::iter::Sum>(&self) -> Hann<T> {
         let weights = (0..self.n)
             .map(|i| {
                 T::from(0.5 * (1.0 - ((2.0 * PI * i as f64) / (self.n as f64 - 1.0)).cos()))

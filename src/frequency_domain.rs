@@ -34,7 +34,6 @@ extern crate alloc;
 use super::welch::{Periodogram, WelchBuilder};
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
-use core::iter::Sum;
 use num::Float;
 
 /// A struct representing frequency-domain heart rate variability (HRV) metrics.
@@ -43,7 +42,7 @@ use num::Float;
 /// These metrics are derived by analyzing the power spectral density (PSD) of the RR intervals, which can provide insights into the autonomic nervous system's regulation of the heart and overall cardiovascular health.
 ///
 /// These frequency-domain metrics provide a deeper understanding of heart rate variability by focusing on the different frequency bands that reflect various physiological processes and autonomic nervous system regulation.
-#[derive(Debug, PartialEq, Clone, Copy)]
+#[derive(Debug, PartialEq, Clone, Copy, Default)]
 pub struct FrequencyMetrics<T> {
     /// Low Frequency (LF) power. Reflects sympathetic and parasympathetic balance, typically between 0.04 and 0.15 Hz.
     pub lf: T,
@@ -57,7 +56,7 @@ pub struct FrequencyMetrics<T> {
 
 impl<
     T: Float
-        + Sum<T>
+        + core::iter::Sum<T>
         + Copy
         + core::fmt::Debug
         + num::Signed
