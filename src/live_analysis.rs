@@ -20,7 +20,7 @@
 //!
 //! Custom pipeline usage:
 //! ```
-//! use cardio_rs::{live_analysis::TimeQueue, windows_analysis::AnalysisPipeline, HrvMetrics};
+//! use cardio_rs::{live_analysis::TimeQueue, processing_utils::AnalysisPipeline, HrvMetrics};
 //! struct CustomPipeline;
 //! impl AnalysisPipeline<f64> for CustomPipeline {
 //!     fn process(&self, data: Vec<f64>) -> HrvMetrics<f64> {
@@ -37,7 +37,7 @@
 //! let hrv = queue.get_hrv();
 //! println!("Calculated HRV with custom pipeline: {:?}", hrv);
 //! ```
-use crate::windows_analysis::AnalysisPipeline;
+use crate::processing_utils::AnalysisPipeline;
 use num::Float;
 #[cfg(feature = "std")]
 use std::collections::VecDeque;

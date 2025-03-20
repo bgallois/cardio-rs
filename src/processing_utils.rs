@@ -236,6 +236,78 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug + num::Signed + 'static + num::
     }
 }
 
+/// A trait for processing HRV data through an analysis pipeline.
+pub trait AnalysisPipeline<T> {
+    /// Processes a vector of RR intervals to compute HRV metrics.
+    ///
+    /// # Arguments
+    /// * `data` - A vector of RR intervals representing the time between heartbeats for a given window.
+    ///
+    /// # Returns
+    /// Returns a struct containing the computed HRV metrics (time-domain, frequency-domain, and geometric).
+    fn process(&self, data: Vec<T>) -> crate::HrvMetrics<T>;
+}
+
+/// A default implementation of the `AnalysisPipeline` trait that computes HRV metrics using a predefined method.
+struct DefaultPipeline();
+impl<
+    T: Float
+        + Sum<T>
+        + Copy
+        + core::fmt::Debug
+        + num::Signed
+        + 'static
+        + core::ops::AddAssign
+        + core::marker::Send
+        + core::marker::Sync
+        + Into<f64>
+        + num::FromPrimitive,
+> AnalysisPipeline<T> for DefaultPipeline
+{
+    fn process(&self, data: Vec<T>) -> crate::HrvMetrics<T> {
+        let mut rr_intervals = RRIntervals::new(data);
+        rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
+        rr_intervals.detect_outliers(&T::from(300).unwrap(), &T::from(2_000).unwrap());
+        rr_intervals.remove_outliers_ectopics();
+
+        let time = crate::time_domain::TimeMetrics::compute(rr_intervals.as_slice());
+        let frequency = crate::frequency_domain::FrequencyMetrics::compute(
+            rr_intervals.as_slice(),
+            T::from(4).unwrap(),
+        );
+        let geometric = crate::geometric_domain::GeometricMetrics::compute(rr_intervals.as_slice());
+
+        crate::HrvMetrics {
+            time,
+            frequency,
+            geometric,
+        }
+    }
+}
+
+impl<
+    T: Float
+        + Sum<T>
+        + Copy
+        + core::fmt::Debug
+        + num::Signed
+        + 'static
+        + core::ops::AddAssign
+        + core::marker::Send
+        + core::marker::Sync
+        + num::FromPrimitive,
+> Default for Box<dyn AnalysisPipeline<T>>
+where
+    f64: From<T>,
+{
+    /// Returns a default instance of the `DefaultPipeline`.
+    ///
+    /// This method returns the default `DefaultPipeline` that computes HRV metrics using default methods.
+    fn default() -> Self {
+        Box::new(DefaultPipeline())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

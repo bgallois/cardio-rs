@@ -42,7 +42,7 @@
 //!
 //! ```rust
 //! use cardio_rs::test_data::RR_INTERVALS;
-//! use cardio_rs::{windows_analysis::{WindowsAnalysisBuilder, AnalysisPipeline}, HrvMetrics, geometric_domain::GeometricMetrics, processing_utils::{EctopicMethod, RRIntervals, DetectOutliers}, time_domain::TimeMetrics, frequency_domain::FrequencyMetrics};
+//! use cardio_rs::{windows_analysis::{WindowsAnalysisBuilder}, HrvMetrics, geometric_domain::GeometricMetrics, processing_utils::{EctopicMethod, RRIntervals, DetectOutliers, AnalysisPipeline}, time_domain::TimeMetrics, frequency_domain::FrequencyMetrics};
 //!
 //! // Define a custom pipeline by implementing the AnalysisPipeline trait
 //! struct CustomPipeline;
@@ -84,13 +84,7 @@
 
 #[cfg(not(feature = "std"))]
 extern crate alloc;
-use crate::{
-    HrvMetrics,
-    frequency_domain::FrequencyMetrics,
-    geometric_domain::GeometricMetrics,
-    processing_utils::{DetectOutliers, EctopicMethod, RRIntervals},
-    time_domain::TimeMetrics,
-};
+use crate::{HrvMetrics, processing_utils::AnalysisPipeline};
 #[cfg(not(feature = "std"))]
 use alloc::{boxed::Box, vec::Vec};
 use core::iter::Sum;
@@ -106,76 +100,7 @@ pub struct WindowsAnalysis<T> {
     pub window_size: T,
 
     /// The list of HRV metrics computed for each window.
-    pub metrics: Vec<super::HrvMetrics<T>>,
-}
-
-/// A trait for processing HRV data through an analysis pipeline.
-pub trait AnalysisPipeline<T> {
-    /// Processes a vector of RR intervals to compute HRV metrics.
-    ///
-    /// # Arguments
-    /// * `data` - A vector of RR intervals representing the time between heartbeats for a given window.
-    ///
-    /// # Returns
-    /// Returns a struct containing the computed HRV metrics (time-domain, frequency-domain, and geometric).
-    fn process(&self, data: Vec<T>) -> super::HrvMetrics<T>;
-}
-
-/// A default implementation of the `AnalysisPipeline` trait that computes HRV metrics using a predefined method.
-struct DefaultPipeline();
-impl<
-    T: Float
-        + Sum<T>
-        + Copy
-        + core::fmt::Debug
-        + num::Signed
-        + 'static
-        + core::ops::AddAssign
-        + core::marker::Send
-        + core::marker::Sync
-        + Into<f64>
-        + num::FromPrimitive,
-> AnalysisPipeline<T> for DefaultPipeline
-{
-    fn process(&self, data: Vec<T>) -> super::HrvMetrics<T> {
-        let mut rr_intervals = RRIntervals::new(data);
-        rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
-        rr_intervals.detect_outliers(&T::from(300).unwrap(), &T::from(2_000).unwrap());
-        rr_intervals.remove_outliers_ectopics();
-
-        let time = TimeMetrics::compute(rr_intervals.as_slice());
-        let frequency = FrequencyMetrics::compute(rr_intervals.as_slice(), T::from(4).unwrap());
-        let geometric = GeometricMetrics::compute(rr_intervals.as_slice());
-
-        HrvMetrics {
-            time,
-            frequency,
-            geometric,
-        }
-    }
-}
-
-impl<
-    T: Float
-        + Sum<T>
-        + Copy
-        + core::fmt::Debug
-        + num::Signed
-        + 'static
-        + core::ops::AddAssign
-        + core::marker::Send
-        + core::marker::Sync
-        + num::FromPrimitive,
-> Default for Box<dyn AnalysisPipeline<T>>
-where
-    f64: From<T>,
-{
-    /// Returns a default instance of the `DefaultPipeline`.
-    ///
-    /// This method returns the default `DefaultPipeline` that computes HRV metrics using default methods.
-    fn default() -> Self {
-        Box::new(DefaultPipeline())
-    }
+    pub metrics: Vec<HrvMetrics<T>>,
 }
 
 /// A builder struct for configuring and constructing a `WindowsAnalysis`.
