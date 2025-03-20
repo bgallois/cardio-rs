@@ -1,73 +1,70 @@
-# ❤️⚡ CARDIO-RS ⚡❤️  
-*A Rust library for Heart Rate Variability (HRV) analysis!*  
+# ❤️⚡ **CARDIO-RS** ⚡❤️  
+*A Rust library for Heart Rate Variability (HRV) analysis*  
 
-[![Docs.rs](https://docs.rs/cardio-rs/badge.svg)](https://docs.rs/cardio-rs)  [![CI](https://github.com/bgallois/cardio-rs/actions/workflows/test.yml/badge.svg)](https://github.com/bgallois/cardio-rs/actions/)[![Crates.io](https://img.shields.io/crates/v/cardio-rs.svg)](https://crates.io/crates/cardio-rs)
+[![Docs.rs](https://docs.rs/cardio-rs/badge.svg)](https://docs.rs/cardio-rs)  [![CI](https://github.com/bgallois/cardio-rs/actions/workflows/test.yml/badge.svg)](https://github.com/bgallois/cardio-rs/actions/) [![Crates.io](https://img.shields.io/crates/v/cardio-rs.svg)](https://crates.io/crates/cardio-rs)
 
-📊 **Compute HRV time-domain & frequency-domain & geometric metrics** from RR intervals with ease!  
+📊 **Compute HRV metrics** in time-domain and frequency-domain from RR intervals with ease!  
 💓 **Preprocess ECG & PPG raw data** for accurate HRV analysis!  
-📟 **Supports embedded systems** with `no_std`!  
+📟 **Compatible with embedded systems** using `no_std`!
 
 ---
 
-## ✨ Features  
+## ✨ **Key Features**  
 
-✅ **Time-domain HRV metrics**: SDNN, RMSSD, PNN50, SDSD, CVSD, and more!  
-✅ **Frequency-domain HRV metrics**: LF, HF, VLF using Welch’s method!  
-✅ **Geometric-domain HRV metrics**: Triangular Index & TINN!  
-✅ **ECG & PPG preprocessing**: Filtering, denoising, peak detection!  
-✅ **Raw & interpolated RR intervals** supported!  
-✅ **🚀 `no_std` compatibility**!  
-✅ **Window Analysis**: Split data into windows of a defined size for segment-based HRV analysis.  
-✅ **Live Analysis**: Perform real-time HRV analysis with customizable pipelines for processing RR intervals!  
+- ✅ **Time-domain HRV metrics**: SDNN, RMSSD, PNN50, SDSD, CVSD, and more!  
+- ✅ **Frequency-domain HRV metrics**: LF, HF, VLF (using Welch’s method).  
+- ✅ **Geometric HRV metrics**: Triangular Index & TINN.  
+- ✅ **ECG & PPG preprocessing**: Filtering, denoising, peak detection.  
+- ✅ **`no_std` compatibility** for embedded systems.  
+- ✅ **Window-based analysis**: Split data into windows for segment-based HRV calculations.  
+- ✅ **Live HRV analysis**: Real-time processing of RR intervals with customizable pipelines.
 
 ---
 
-## 📏 Time-domain HRV Metrics  
+## 📏 **Time-domain HRV Metrics**  
 
-- 🔹 **RMSSD** – Measures short-term HRV.  
-- 🔹 **SDNN** – Measures overall HRV.  
+- 🔹 **RMSSD** – Short-term HRV measurement.  
+- 🔹 **SDNN** – Overall HRV measurement.  
 - 🔹 **PNN50** – Percentage of successive RR intervals > 50ms.  
-- 🔹 **SDSD** – Standard deviation of successive differences.  
+- 🔹 **SDSD** – Standard deviation of successive RR intervals.  
 - 🔹 **Mean HR** – Average heart rate.  
 - 🔹 **AVNN** – Mean of all RR intervals.  
-- 🔹 **CVSD** – RMSSD divided by the mean RR interval.  
+- 🔹 **CVSD** – RMSSD divided by the mean RR interval.
 
 ---
 
-## 📐 Geometric HRV Metrics  
+## 📐 **Geometric HRV Metrics**  
 
 - 📊 **Triangular Index** – Measures RR interval distribution.  
-- 📊 **TINN (Triangular Interpolation of NN Interval Histogram)** – Estimates RR variability.  
+- 📊 **TINN** (Triangular Interpolation of NN Interval Histogram) – Estimates RR variability.
 
 ---
 
-## 🎵 Frequency-domain HRV Metrics  
+## 🎵 **Frequency-domain HRV Metrics**  
 
-📡 Computed using **Welch’s method** for spectral density estimation:  
+**Computed using Welch’s method** for spectral density estimation:
 
-- 🎼 **LF (Low Frequency)** – Sympathetic & parasympathetic balance (**0.04 - 0.15 Hz**).  
+- 🎼 **LF (Low Frequency)** – Sympathetic and parasympathetic balance (**0.04 - 0.15 Hz**).  
 - 🎼 **HF (High Frequency)** – Parasympathetic activity (**0.15 - 0.40 Hz**).  
 - 🎼 **VLF (Very Low Frequency)** – Long-term regulatory processes (**0.003 - 0.04 Hz**).  
 
 ---
 
-## 🏥 ECG & PPG Data Processing  
+## 🏥 **ECG & PPG Data Processing**  
 
-📡 **ECG Processing** – R-wave peak detection, filtering, and RR extraction!  
-💡 **PPG Processing** – Pulse detection & signal cleaning for HRV computation!  
+- 📡 **ECG Processing**: R-wave peak detection, filtering, and RR extraction.  
+- 💡 **PPG Processing**: Pulse detection & signal cleaning for HRV computation.
 
 ---
 
-## 🪟 Window Analysis  
+## 🪟 **Window Analysis**  
 
-Cardio-rs supports **window analysis**, where your data can be split into windows of a defined size. This feature is ideal for segment-based HRV analysis, where the data is divided into distinct time periods (windows).  
+Cardio-rs supports **window analysis**, which allows you to split data into segments of a defined size. This is useful for performing HRV analysis on specific time periods or segments of data.
 
-### Example:  
+### Example:
 
 ```rust
-use cardio_rs::{
-    windows_analysis::WindowsAnalysisBuilder,
-};
+use cardio_rs::{ windows_analysis::WindowsAnalysisBuilder };
 
 let data = vec![800., 810., 790., 765., 780., 800., 810., 795., 770., 785.];
 
@@ -76,31 +73,25 @@ let analysis = WindowsAnalysisBuilder::new(data)
     .with_window_size(3_000.)
     .build();
 
-// Get the HRV metrics for each window
+// Get HRV metrics for each window
 println!("{:?}", analysis.metrics);
 ```
 
-This allows you to perform HRV analysis on distinct segments of data, making it ideal for scenarios where you want to analyze specific time periods independently.
-
 ---
 
-## 🔄 Live Analysis  
+## 🔄 **Live Analysis**  
 
-The **live analysis** module enables real-time HRV analysis, processing incoming RR intervals and calculating HRV metrics dynamically. This allows you to process data in real-time as it is received.
+The **live analysis** module allows for real-time HRV calculations by dynamically processing incoming RR intervals. You can define a custom analysis pipeline or use the default pipeline for standard HRV metrics.
 
-You can define a custom analysis pipeline for processing the data, enabling flexible and modular HRV calculations. A default pipeline is provided for standard HRV calculations.
-
-### Example:  
+### Example:
 
 ```rust
-use cardio_rs::{
-    live_analysis::TimeQueue,
-    HrvMetrics,
-};
+use cardio_rs::{ live_analysis::TimeQueue, HrvMetrics };
 use cardio_rs::utils::test_data::RR_INTERVALS;
 
-let mut queue = TimeQueue::new(60_000);
+let mut queue = TimeQueue::new(60_000);  // Set the time window (in milliseconds)
 let rr_intervals = RR_INTERVALS.to_vec();
+
 for interval in rr_intervals {
     queue.push(interval);
 }
@@ -111,15 +102,12 @@ println!("Calculated HRV: {:?}", hrv);
 
 ---
 
-## 🦀 Example Usage  
+## 🦀 **Example Usage**  
 
-### 🚀 Compute HRV Metrics & Load ECG Data  
+### 🚀 **Compute HRV Metrics & Load ECG Data**  
 
 ```rust
-use cardio_rs::{
-    standard_analysis,
-    HrvMetrics,
-};
+use cardio_rs::{ standard_analysis, HrvMetrics };
 
 let path = "tests/ecg.csv";
 let signal = "ECG_Raw";
@@ -132,11 +120,11 @@ println!("{:?}", hrv_metrics);
 ```rust
 #[cfg(feature = "std")] {
 use cardio_rs::{
-    processing_utils::{RRIntervals, EctopicMethod, DetectOutliers},
+    processing_utils::{ RRIntervals, EctopicMethod, DetectOutliers },
     time_domain::TimeMetrics,
     geometric_domain::GeometricMetrics,
     frequency_domain::FrequencyMetrics,
-    io_utils::{DataBuilder},
+    io_utils::{ DataBuilder },
     standard_analysis,
     HrvMetrics,
 };
@@ -152,8 +140,7 @@ let data = DataBuilder::new(path.into(), signal.into())
 let hrv_metrics = standard_analysis!(data.clone().get_rr());
 println!("{:?}", hrv_metrics);
 
-// Or manually for more control
-
+// Manual analysis for more control
 let mut rr_intervals = RRIntervals::new(data.get_rr());
 
 rr_intervals.detect_ectopics(EctopicMethod::Karlsson);
@@ -166,9 +153,11 @@ println!("{:?}", time_metrics);
 let frequency_metrics = FrequencyMetrics::compute(rr_intervals.as_slice(), 10.);
 println!("{:?}", frequency_metrics);
 
-let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());
+let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());  // Corrected module name
 println!("{:?}", geo_metrics);
 }
 ```
+
+---
 
 🔥 **Start analyzing HRV today with cardio-rs!** 🚀💓
