@@ -12,7 +12,7 @@
 //! # Example Usage
 //! ```
 //! use cardio_rs::frequency_domain::FrequencyMetrics;
-//! use cardio_rs::test_data::RR_INTERVALS;
+//! use cardio_rs::utils::test_data::RR_INTERVALS;
 //!
 //! let rate = 4.0;
 //! let frequency_metrics = FrequencyMetrics::compute_sampled(RR_INTERVALS, rate);
@@ -31,7 +31,7 @@
 
 #[cfg(not(feature = "std"))]
 extern crate alloc;
-use super::welch::{Periodogram, WelchBuilder};
+use crate::utils::welch::{Periodogram, WelchBuilder};
 #[cfg(not(feature = "std"))]
 use alloc::vec::Vec;
 use num::Float;
@@ -114,7 +114,7 @@ impl<
     /// # Example
     /// ```
     /// use cardio_rs::frequency_domain::FrequencyMetrics;
-    /// use cardio_rs::test_data::RR_INTERVALS;
+    /// use cardio_rs::utils::test_data::RR_INTERVALS;
     ///
     /// let rate = 4.0;
     /// let frequency_metrics = FrequencyMetrics::compute_sampled(RR_INTERVALS, rate);
@@ -196,7 +196,7 @@ impl<
     /// # Example
     /// ```
     /// use cardio_rs::frequency_domain::FrequencyMetrics;
-    /// use cardio_rs::test_data::RR_INTERVALS;
+    /// use cardio_rs::utils::test_data::RR_INTERVALS;
     ///
     /// let frequency_metrics = FrequencyMetrics::compute(RR_INTERVALS, 4.);
     /// ```
@@ -223,7 +223,7 @@ impl<
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::RR_INTERVALS;
+    use crate::utils::test_data::RR_INTERVALS;
     use approx::{AbsDiffEq, RelativeEq, UlpsEq, assert_relative_eq};
 
     impl<T: AbsDiffEq> AbsDiffEq for FrequencyMetrics<T>

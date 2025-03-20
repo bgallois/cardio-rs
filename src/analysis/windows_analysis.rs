@@ -21,7 +21,7 @@
 //!
 //! ### Basic Example (Using Default Pipeline):
 //! ```rust
-//! use cardio_rs::test_data::RR_INTERVALS;
+//! use cardio_rs::utils::test_data::RR_INTERVALS;
 //! use cardio_rs::windows_analysis::WindowsAnalysisBuilder;
 //!
 //! let rr_intervals = RR_INTERVALS.to_vec();
@@ -41,7 +41,7 @@
 //! This allows you to customize how HRV metrics are computed over the RR intervals.
 //!
 //! ```rust
-//! use cardio_rs::test_data::RR_INTERVALS;
+//! use cardio_rs::utils::test_data::RR_INTERVALS;
 //! use cardio_rs::{windows_analysis::{WindowsAnalysisBuilder}, HrvMetrics, geometric_domain::GeometricMetrics, processing_utils::{EctopicMethod, RRIntervals, DetectOutliers, AnalysisPipeline}, time_domain::TimeMetrics, frequency_domain::FrequencyMetrics};
 //!
 //! // Define a custom pipeline by implementing the AnalysisPipeline trait
@@ -212,7 +212,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::RR_INTERVALS;
+    use crate::utils::test_data::RR_INTERVALS;
 
     #[test]
     fn test_window_size() {

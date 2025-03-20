@@ -97,7 +97,7 @@ use cardio_rs::{
     live_analysis::TimeQueue,
     HrvMetrics,
 };
-use cardio_rs::test_data::RR_INTERVALS;
+use cardio_rs::utils::test_data::RR_INTERVALS;
 
 let mut queue = TimeQueue::new(60_000);
 let rr_intervals = RR_INTERVALS.to_vec();

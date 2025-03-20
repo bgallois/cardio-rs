@@ -1,15 +1,16 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub mod frequency_domain;
-pub mod geometric_domain;
-pub mod io_utils;
-pub mod live_analysis;
-pub mod processing_utils;
-pub mod test_data;
-pub mod time_domain;
-pub mod welch;
-pub mod windows_analysis;
+pub mod metrics;
+pub use metrics::{frequency_domain, geometric_domain, time_domain};
+
+pub mod utils;
+#[cfg(feature = "std")]
+pub use utils::io_utils;
+pub use utils::processing_utils;
+
+pub mod analysis;
+pub use analysis::{live_analysis, windows_analysis};
 
 /// A struct that contains the Heart Rate Variability (HRV) metrics,
 /// divided into time-domain, frequency-domain, and geometric-domain metrics.

@@ -7,7 +7,7 @@
 //!
 //! Basic usage with the default pipeline:
 //! ```
-//! use cardio_rs::test_data::RR_INTERVALS;
+//! use cardio_rs::utils::test_data::RR_INTERVALS;
 //! use cardio_rs::live_analysis::TimeQueue;
 //! let mut queue = TimeQueue::new(60_000);
 //! let rr_intervals = RR_INTERVALS.to_vec();
@@ -27,7 +27,7 @@
 //!         HrvMetrics::default()
 //!     }
 //! }
-//! use cardio_rs::test_data::RR_INTERVALS;
+//! use cardio_rs::utils::test_data::RR_INTERVALS;
 //! let mut queue = TimeQueue::new(60_000);
 //! queue.set_pipeline(Box::new(CustomPipeline));
 //! let rr_intervals = RR_INTERVALS.to_vec();
@@ -120,7 +120,7 @@ where
     /// Processes the current RR intervals using the pipeline and returns the HRV metrics.
     ///
     /// This function calls the `process` method on the custom or default pipeline to calculate HRV.
-    pub fn get_hrv(&self) -> super::HrvMetrics<T> {
+    pub fn get_hrv(&self) -> crate::HrvMetrics<T> {
         self.pipeline.process(self.get().to_vec())
     }
 }
@@ -130,7 +130,7 @@ mod tests {
     use super::*;
     use crate::{
         frequency_domain::FrequencyMetrics, geometric_domain::GeometricMetrics,
-        processing_utils::RRIntervals, test_data::RR_INTERVALS, time_domain::TimeMetrics,
+        processing_utils::RRIntervals, time_domain::TimeMetrics, utils::test_data::RR_INTERVALS,
     };
     #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;

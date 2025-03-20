@@ -109,7 +109,7 @@ impl<T: Float + Sum<T> + Copy + core::fmt::Debug + core::ops::AddAssign + Into<f
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::RR_INTERVALS;
+    use crate::utils::test_data::RR_INTERVALS;
     use approx::{AbsDiffEq, RelativeEq, UlpsEq, assert_relative_eq};
     impl<T: AbsDiffEq> AbsDiffEq for GeometricMetrics<T>
     where

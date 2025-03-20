@@ -37,7 +37,7 @@
 #[cfg(not(feature = "std"))]
 extern crate alloc;
 #[cfg(not(feature = "std"))]
-use alloc::{vec, vec::Vec};
+use alloc::{boxed::Box, vec, vec::Vec};
 use core::{
     iter::Sum,
     ops::{Deref, DerefMut},
@@ -311,7 +311,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_data::RR_INTERVALS;
+    use crate::utils::test_data::RR_INTERVALS;
 
     #[test]
     fn test_remove_none() {
