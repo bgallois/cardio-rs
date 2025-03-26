@@ -3,7 +3,7 @@
 
 [![Docs.rs](https://docs.rs/cardio-rs/badge.svg)](https://docs.rs/cardio-rs)  [![CI](https://github.com/bgallois/cardio-rs/actions/workflows/test.yml/badge.svg)](https://github.com/bgallois/cardio-rs/actions/) [![Crates.io](https://img.shields.io/crates/v/cardio-rs.svg)](https://crates.io/crates/cardio-rs)
 
-📊 **Compute HRV metrics** in time-domain and frequency-domain from RR intervals with ease!  
+📊 **Compute HRV metrics** in time-domain, frequency-domain, and non-linear domain from RR intervals with ease!  
 💓 **Preprocess ECG & PPG raw data** for accurate HRV analysis!  
 📟 **Compatible with embedded systems** using `no_std`!
 
@@ -14,6 +14,7 @@
 - ✅ **Time-domain HRV metrics**: SDNN, RMSSD, PNN50, SDSD, CVSD, and more!  
 - ✅ **Frequency-domain HRV metrics**: LF, HF, VLF (using Welch’s method).  
 - ✅ **Geometric HRV metrics**: Triangular Index & TINN.  
+- ✅ **Non-linear HRV metrics**: SampEn, DFA, LZC, and more!  
 - ✅ **ECG & PPG preprocessing**: Filtering, denoising, peak detection.  
 - ✅ **`no_std` compatibility** for embedded systems.  
 - ✅ **Window-based analysis**: Split data into windows for segment-based HRV calculations.  
@@ -47,6 +48,16 @@
 - 🎼 **LF (Low Frequency)** – Sympathetic and parasympathetic balance (**0.04 - 0.15 Hz**).  
 - 🎼 **HF (High Frequency)** – Parasympathetic activity (**0.15 - 0.40 Hz**).  
 - 🎼 **VLF (Very Low Frequency)** – Long-term regulatory processes (**0.003 - 0.04 Hz**).  
+
+---
+
+## 🧩 **Non-linear HRV Metrics**  
+
+Non-linear HRV metrics provide insights into the complexity and self-organization of the heart's autonomic regulation. They are useful for capturing dynamics that cannot be fully understood through linear analysis alone.
+
+- 🔹 **SampEn (Sample Entropy)** – Measures the regularity and unpredictability of a time series.  
+- 🔹 **DFA (Detrended Fluctuation Analysis)** – Evaluates long-range correlations and scaling behavior in the RR intervals.  
+- 🔹 **LZC (Lempel-Ziv Complexity)** – Quantifies the complexity of a binary sequence derived from RR intervals.
 
 ---
 
@@ -122,6 +133,7 @@ println!("{:?}", hrv_metrics);
 use cardio_rs::{
     processing_utils::{ RRIntervals, EctopicMethod, DetectOutliers },
     time_domain::TimeMetrics,
+    non_linear::NonLinearMetrics,
     geometric_domain::GeometricMetrics,
     frequency_domain::FrequencyMetrics,
     io_utils::{ DataBuilder },
@@ -153,8 +165,11 @@ println!("{:?}", time_metrics);
 let frequency_metrics = FrequencyMetrics::compute(rr_intervals.as_slice(), 10.);
 println!("{:?}", frequency_metrics);
 
-let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());  // Corrected module name
+let geo_metrics = GeometricMetrics::compute(rr_intervals.as_slice());
 println!("{:?}", geo_metrics);
+
+let non_linear_metrics = NonLinearMetrics::compute_default(&rr_intervals);
+println!("{:?}", non_linear_metrics);
 }
 ```
 

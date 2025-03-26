@@ -2,7 +2,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub mod metrics;
-pub use metrics::{frequency_domain, geometric_domain, time_domain};
+pub use metrics::{frequency_domain, geometric_domain, non_linear, time_domain};
 
 pub mod utils;
 #[cfg(feature = "std")]
@@ -22,6 +22,8 @@ pub struct HrvMetrics<T> {
     pub frequency: crate::frequency_domain::FrequencyMetrics<T>,
     /// Geometric-domain HRV metrics (`GeometricMetrics<T>`).
     pub geometric: crate::geometric_domain::GeometricMetrics<T>,
+    /// Non-linear HRV metrics (`NonLinearMetrics<T>`).
+    pub non_linear: crate::non_linear::NonLinearMetrics<T>,
 }
 
 /// A macro that performs a standard HRV analysis on a given input, returning the HRV metrics
@@ -72,6 +74,7 @@ macro_rules! standard_analysis {
         use cardio_rs::{
             frequency_domain::FrequencyMetrics,
             geometric_domain::GeometricMetrics,
+            non_linear::NonLinearMetrics,
             processing_utils::{DetectOutliers, EctopicMethod, RRIntervals},
             time_domain::TimeMetrics,
         };
@@ -83,11 +86,13 @@ macro_rules! standard_analysis {
         let time = TimeMetrics::compute(rr_intervals.as_slice());
         let frequency = FrequencyMetrics::compute(rr_intervals.as_slice(), 4.);
         let geometric = GeometricMetrics::compute(rr_intervals.as_slice());
+        let non_linear = NonLinearMetrics::compute_default(rr_intervals.as_slice());
 
         HrvMetrics {
             time,
             frequency,
             geometric,
+            non_linear,
         }
     }};
     ( $path:expr, $signal:expr, $rate:expr ) => {{

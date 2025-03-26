@@ -130,7 +130,8 @@ mod tests {
     use super::*;
     use crate::{
         frequency_domain::FrequencyMetrics, geometric_domain::GeometricMetrics,
-        processing_utils::RRIntervals, time_domain::TimeMetrics, utils::test_data::RR_INTERVALS,
+        non_linear::NonLinearMetrics, processing_utils::RRIntervals, time_domain::TimeMetrics,
+        utils::test_data::RR_INTERVALS,
     };
     #[cfg(not(feature = "std"))]
     use alloc::vec::Vec;
@@ -165,11 +166,13 @@ mod tests {
                 let time = TimeMetrics::compute(rr_intervals.as_slice());
                 let frequency = FrequencyMetrics::compute(rr_intervals.as_slice(), 4.);
                 let geometric = GeometricMetrics::compute(rr_intervals.as_slice());
+                let non_linear = NonLinearMetrics::compute_default(rr_intervals.as_slice());
 
                 crate::HrvMetrics {
                     time,
                     frequency,
                     geometric,
+                    non_linear,
                 }
             }
         }

@@ -42,7 +42,7 @@
 //!
 //! ```rust
 //! use cardio_rs::utils::test_data::RR_INTERVALS;
-//! use cardio_rs::{windows_analysis::{WindowsAnalysisBuilder}, HrvMetrics, geometric_domain::GeometricMetrics, processing_utils::{EctopicMethod, RRIntervals, DetectOutliers, AnalysisPipeline}, time_domain::TimeMetrics, frequency_domain::FrequencyMetrics};
+//! use cardio_rs::{windows_analysis::{WindowsAnalysisBuilder}, HrvMetrics, geometric_domain::GeometricMetrics, non_linear::NonLinearMetrics, processing_utils::{EctopicMethod, RRIntervals, DetectOutliers, AnalysisPipeline}, time_domain::TimeMetrics, frequency_domain::FrequencyMetrics};
 //!
 //! // Define a custom pipeline by implementing the AnalysisPipeline trait
 //! struct CustomPipeline;
@@ -58,11 +58,13 @@
 //!       let time = TimeMetrics::compute(rr_intervals.as_slice());
 //!       let frequency = FrequencyMetrics::compute(rr_intervals.as_slice(), 10.);
 //!       let geometric = GeometricMetrics::compute(rr_intervals.as_slice());
+//!       let non_linear = NonLinearMetrics::compute_default(rr_intervals.as_slice());
 //!
 //!       HrvMetrics {
 //!           time,
 //!           frequency,
 //!           geometric,
+//!           non_linear,
 //!       }
 //!     }
 //! }
