@@ -276,11 +276,14 @@ impl<
             T::from(4).unwrap(),
         );
         let geometric = crate::geometric_domain::GeometricMetrics::compute(rr_intervals.as_slice());
+        let non_linear =
+            crate::non_linear::NonLinearMetrics::compute_default(rr_intervals.as_slice());
 
         crate::HrvMetrics {
             time,
             frequency,
             geometric,
+            non_linear,
         }
     }
 }
